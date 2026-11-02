@@ -1,0 +1,57 @@
+/* ClauseGuard — light theme overrides. Applied only when <html data-theme="light">.
+   Dark (original) theme is untouched. Colour values only. */
+html[data-theme="light"]{--bg:#F6F3EA;--surface:#FBF9F3;--surface-raised:#FDFBF6;--text:#1B1C1A;--muted:#62645B;--muted-2:#6C6E64;--line:rgba(27,28,26,0.127);--line-strong:rgba(27,28,26,0.23);--acid:#7F6A2E;--acid-soft:rgba(127,106,46,0.11);--warning:#8A6A1E;--danger:#A8483D;}
+html[data-theme="light"] ::selection{color:#F6F3EA;}
+html[data-theme="light"] .brand-mark,
+html[data-theme="light"] .status-dot,
+html[data-theme="light"] .state-live-dot{box-shadow:0 0 12px rgba(127,106,46,0.35);}
+html[data-theme="light"] .event-card{background:linear-gradient(135deg, rgba(127,106,46,0.035), transparent 80%),
+        var(--surface);}
+html[data-theme="light"] .event-accent{box-shadow:0 0 16px rgba(127,106,46,0.2);}
+html[data-theme="light"] .clause-area{background:linear-gradient(140deg, rgba(127,106,46,0.018), transparent 60%),
+        rgba(246,243,234,0.75);}
+html[data-theme="light"] .clause-row{border-bottom:1px solid rgba(27,28,26,0.092);}
+html[data-theme="light"] .clause-row:hover{background:rgba(127,106,46,0.035);}
+html[data-theme="light"] .clause-row.active{background:linear-gradient(90deg, rgba(127,106,46,0.12), rgba(127,106,46,0.025));}
+html[data-theme="light"] .rule-card{border:1px solid rgba(127,106,46,0.32);background:linear-gradient(135deg, rgba(127,106,46,0.04), transparent 80%),
+        var(--surface);}
+html[data-theme="light"] .deadline-card{background:rgba(246,243,234,0.8);}
+html[data-theme="light"] .recent-item:hover:not(:disabled){background:rgba(127,106,46,0.035);}
+html[data-theme="light"] .status-pill.attention{border-color:rgba(138,106,30,0.4);}
+html[data-theme="light"] .status-pill.relevant{border-color:rgba(127,106,46,0.35);}
+html[data-theme="light"] .selected-card{background:linear-gradient(135deg, rgba(127,106,46,0.025), transparent 55%),
+        var(--surface);}
+html[data-theme="light"] .selected-rule p{color:#62645B;}
+html[data-theme="light"] .modal-backdrop{background:rgba(0,0,0,0.378);}
+html[data-theme="light"] .modal-card{background:#FBF9F3;box-shadow:0 30px 100px rgba(0,0,0,0.248);}
+html[data-theme="light"] .modal-evidence{background:rgba(127,106,46,0.045);}
+html[data-theme="light"] .backend-error{border:1px solid rgba(168,72,61,0.45);background:#FBF9F3;}
+html[data-theme="light"] .source-strip{background:linear-gradient(
+            110deg,
+            rgba(127,106,46,0.035),
+            transparent 65%
+        ),
+        var(--surface);}
+html[data-theme="light"] .priority-alert-panel{border:1px solid rgba(138,106,30,0.34);background:linear-gradient(
+            110deg,
+            rgba(138,106,30,0.065),
+            transparent 70%
+        ),
+        #F6F3EA;}
+html[data-theme="light"] .priority-alert-topline{border-bottom:1px solid rgba(138,106,30,0.15);}
+html[data-theme="light"] .priority-alert-indicator{color:#8A6A1E;}
+html[data-theme="light"] .priority-alert-dot{background:#8A6A1E;box-shadow:0 0 10px rgba(138,106,30,0.4);}
+html[data-theme="light"] .priority-alert-meta{color:#7F6A2E;}
+html[data-theme="light"] .priority-action-primary{border-color:rgba(138,106,30,0.42);color:#8A6A1E;}
+html[data-theme="light"] .priority-action-primary:hover:not(:disabled){border-color:#8A6A1E;background:rgba(138,106,30,0.08);color:#6B5822;}
+html[data-theme="light"] .priority-action-danger{border-color:rgba(168,72,61,0.45);}
+html[data-theme="light"] .priority-action-danger:hover:not(:disabled){background:rgba(168,72,61,0.08);color:#A8483D;}
+html[data-theme="light"] .priority-alert-footnote{border-top:1px solid rgba(27,28,26,0.081);}
+html[data-theme="light"] .alert-confirmation{border:1px solid rgba(168,72,61,0.25);background:rgba(168,72,61,0.035);}
+html[data-theme="light"] .signal-flow-line{stroke:rgba(127,106,46,0.32);}
+html[data-theme="light"] .signal-flow-pulse{filter:drop-shadow(0 0 3px rgba(127,106,46,0.35));}
+html[data-theme="light"] .clause-row.active .clause-number{text-shadow:0 0 16px rgba(127,106,46,0.14);}
+html[data-theme="light"] .watchtower-toast{background:#FBF9F3;}
+html[data-theme="light"] .watchtower-toast.toast-success{border-color:rgba(127,106,46,0.4);}
+html[data-theme="light"] .watchtower-toast.toast-warning{border-color:rgba(138,106,30,0.45);}
+html[data-theme="light"] .watchtower-toast.toast-error{border-color:rgba(168,72,61,0.45);}

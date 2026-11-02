@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        ClauseGuard — Contract Intelligence
+    </title>
+
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem("clauseguard.theme");
+                document.documentElement.setAttribute("data-theme", savedTheme === "light" ? "light" : "dark");
+            } catch (error) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+    <link rel="stylesheet" href="/static/light-theme.css">
+
+</head>
+
+
+<body>
+
+    <div class="app-shell">
+
+
+        <!-- ==================================================
+             SIDEBAR
+        =================================================== -->
+
+        <aside class="sidebar">
+
+
+            <!-- BRAND -->
+
+            <div class="brand">
+
+                <div class="brand-mark">
+                    C
+                </div>
+
+                <div>
+
+                    <div class="brand-name">
+                        ClauseGuard
+                    </div>
+
+                    <div class="brand-subtitle">
+                        CONTRACT INTELLIGENCE
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- WORKSPACE -->
+
+            <div class="sidebar-section">
+
+                <div class="sidebar-label">
+                    WORKSPACE
+                </div>
+
+
+                <button
+                    class="nav-item active"
+                    id="overviewNav"
+                    type="button"
+                >
+
+                    <span class="nav-icon">
+                        ◇
+                    </span>
+
+                    <span>
+                        Contract review
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    id="askContractNav"
+                    type="button"
+                >
+
+                    <span class="nav-icon">
+                        ?
+                    </span>
+
+                    <span>
+                        Ask Your Contract
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    id="watchtowerNav"
+                    type="button"
+                >
+
+                    <span class="nav-icon">
+                        ◎
+                    </span>
+
+                    <span>
+                        Watchtower
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="nav-item"
+                    id="newAnalysisNav"
+                    type="button"
+                >
+
+                    <span class="nav-icon">
+                        ＋
+                    </span>
+
+                    <span>
+                        New analysis
+                    </span>
+
+                </button>
+
+            </div>
+
+
+            <!-- CURRENT ENGINE -->
+
+            <div class="sidebar-section engine-section">
+
+                <div class="sidebar-label">
+                    CURRENT ENGINE
+                </div>
+
+
+                <div class="engine-copy">
+
+                    <strong>
+                        Deterministic review
+                    </strong>
+
+                    <p>
+                        ClauseGuard currently uses
+                        document parsing, clause
+                        classification and rule-based
+                        risk signals.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="sidebar-spacer"></div>
+
+
+            <!-- STATUS -->
+
+            <div class="sidebar-status">
+
+                <span class="status-dot"></span>
+
+                <span>
+                    Analysis engine online
+                </span>
+
+            </div>
+
+
+            <!-- USER -->
+
+            <div class="workspace-profile">
+
+                <div
+                    class="profile-initials"
+                    id="profileInitials"
+                >
+                    US
+                </div>
+
+
+                <div class="profile-information">
+
+                    <div
+                        class="profile-name"
+                        id="profileName"
+                    >
+                        User
+                    </div>
+
+                    <div
+                        class="profile-meta"
+                        id="profileEmail"
+                    >
+                        Personal workspace
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- LOGOUT -->
+
+            <button
+                class="sidebar-logout"
+                id="logoutButton"
+                type="button"
+            >
+                Log out
+            </button>
+
+        </aside>
+
+
+
+        <!-- ==================================================
+             MAIN AREA
+        =================================================== -->
+
+        <main class="main-area">
+
+
+            <!-- TOP BAR -->
+
+            <header class="topbar">
+
+                <div class="breadcrumb">
+
+                    <span>
+                        CLAUSEGUARD
+                    </span>
+
+                    <b>
+                        /
+                    </b>
+
+                    <strong id="breadcrumbPage">
+                        Contract review
+                    </strong>
+
+                </div>
+
+
+                <div class="topbar-actions">
+                    <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme" title="Switch to light theme">
+                        <span class="theme-toggle-icon" aria-hidden="true">☼</span>
+                        <span class="theme-toggle-label">Light theme</span>
+                    </button>
+                    <button
+                        class="topbar-action"
+                        id="topNewAnalysis"
+                        type="button"
+                    >
+                        ＋ New analysis
+                    </button>
+                </div>
+
+            </header>
+
+
+
+            <!-- PAGE CONTENT -->
+
+            <section class="page-content">
+
+
+                <!-- GLOBAL ERROR -->
+
+                <div
+                    id="errorBanner"
+                    class="error-banner hidden"
+                ></div>
+
+
+
+                <!-- ==================================================
+                     UPLOAD VIEW
+                =================================================== -->
+
+                <section
+                    id="uploadView"
+                    class="view"
+                >
+
+
+                    <!-- HERO -->
+
+                    <div class="hero-copy">
+
+                        <div class="eyebrow">
+                            CONTRACT REVIEW
+                        </div>
+
+
+                        <h1>
+                            Understand your contract
+                            before you sign.
+                        </h1>
+
+
+                        <p>
+                            Upload an agreement and
+                            ClauseGuard will organize the
+                            contract into clauses and
+                            surface provisions that may
+                            deserve closer review.
+                        </p>
+
+                    </div>
+
+
+
+                    <!-- UPLOAD CARD -->
+
+                    <div class="upload-card">
+
+
+                        <div class="section-kicker">
+                            SOURCE DOCUMENT
+                        </div>
+
+
+                        <h2>
+                            Upload your agreement
+                        </h2>
+
+
+                        <div class="file-type-line">
+                            PDF · DOCX
+                        </div>
+
+
+
+                        <!-- DROPZONE -->
+
+                        <div
+                            class="dropzone"
+                            id="dropzone"
+                            role="button"
+                            tabindex="0"
+                            aria-label="Choose a PDF or DOCX contract"
+                        >
+
+
+                            <input
+                                id="fileInput"
+                                type="file"
+                                accept=".pdf,.docx"
+                                hidden
+                            >
+
+
+                            <div class="upload-icon">
+                                ↑
+                            </div>
+
+
+                            <div
+                                class="drop-title"
+                                id="dropTitle"
+                            >
+                                Drop your contract here
+                            </div>
+
+
+                            <div
+                                class="drop-subtitle"
+                                id="dropSubtitle"
+                            >
+                                or click to choose a PDF or DOCX
+                            </div>
+
+
+                            <div
+                                class="selected-file hidden"
+                                id="selectedFile"
+                            ></div>
+
+                        </div>
+
+
+
+                        <!-- UPLOAD FOOTER -->
+
+                        <div class="upload-footer">
+
+                            <span>
+                                The current review engine
+                                runs locally on your
+                                development backend.
+                            </span>
+
+
+                            <button
+                                id="analyzeFileBtn"
+                                class="primary-btn"
+                                type="button"
+                                disabled
+                            >
+                                Analyze contract
+
+                                <span>
+                                    →
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- HOW IT WORKS -->
+
+                    <div class="how-it-works">
+
+                        <div class="section-kicker">
+                            HOW IT WORKS
+                        </div>
+
+
+                        <div class="workflow-grid">
+
+
+                            <div class="workflow-step">
+
+                                <span class="step-number">
+                                    01
+                                </span>
+
+
+                                <h3>
+                                    Read the document
+                                </h3>
+
+
+                                <p>
+                                    Extract text from your
+                                    uploaded agreement.
+                                </p>
+
+                            </div>
+
+
+
+                            <div class="workflow-step">
+
+                                <span class="step-number">
+                                    02
+                                </span>
+
+
+                                <h3>
+                                    Organize the clauses
+                                </h3>
+
+
+                                <p>
+                                    Detect sections and
+                                    identify clause types.
+                                </p>
+
+                            </div>
+
+
+
+                            <div class="workflow-step">
+
+                                <span class="step-number">
+                                    03
+                                </span>
+
+
+                                <h3>
+                                    Surface risk
+                                </h3>
+
+
+                                <p>
+                                    Group clauses by the
+                                    severity of detected
+                                    signals.
+                                </p>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     PROCESSING VIEW
+                =================================================== -->
+
+                <section
+                    id="processingView"
+                    class="view hidden"
+                >
+
+
+                    <div class="processing-card">
+
+
+                        <div class="processing-mark">
+                            C
+                        </div>
+
+
+                        <div class="eyebrow">
+                            ANALYZING CONTRACT
+                        </div>
+
+
+                        <h1 id="processingTitle">
+                            Reviewing your agreement
+                        </h1>
+
+
+                        <p id="processingSubtitle">
+                            Extracting text, organizing
+                            clauses and checking risk
+                            signals.
+                        </p>
+
+
+                        <div class="progress-track">
+
+                            <div
+                                class="progress-bar"
+                                id="progressBar"
+                            ></div>
+
+                        </div>
+
+
+                        <div class="processing-steps">
+
+                            <span id="step1">
+                                01 · Read document
+                            </span>
+
+
+                            <span id="step2">
+                                02 · Organize clauses
+                            </span>
+
+
+                            <span id="step3">
+                                03 · Surface risk
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     OVERVIEW VIEW
+                =================================================== -->
+
+                <section
+                    id="overviewView"
+                    class="view hidden"
+                >
+
+
+                    <!-- RESULTS HEADER -->
+
+                    <div class="results-heading">
+
+
+                        <div>
+
+                            <div class="eyebrow">
+                                CONTRACT REVIEW
+                            </div>
+
+
+                            <h1>
+                                Risk overview
+                            </h1>
+
+
+                            <p id="documentMeta">
+                                Your agreement has been
+                                organized into
+                                clause-level findings.
+                            </p>
+
+                        </div>
+
+
+                        <button
+                            class="secondary-btn"
+                            id="reviewAllBtn"
+                            type="button"
+                        >
+                            Review findings →
+
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- SUMMARY -->
+
+                    <div class="summary-strip">
+
+
+                        <div class="summary-metric">
+
+                            <span>
+                                OVERALL RISK
+                            </span>
+
+
+                            <strong id="overallScore">
+                                —
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="summary-metric">
+
+                            <span>
+                                TOTAL CLAUSES
+                            </span>
+
+
+                            <strong id="totalClauses">
+                                —
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="summary-metric">
+
+                            <span>
+                                NEED ATTENTION
+                            </span>
+
+
+                            <strong id="attentionCount">
+                                —
+                            </strong>
+
+                        </div>
+
+
+
+                        <div class="summary-note">
+
+                            <span class="summary-dot"></span>
+
+                            <span>
+                                Review the higher-severity
+                                categories first.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- RISK CATEGORIES -->
+
+                    <div class="risk-section-head">
+
+
+                        <div>
+
+                            <div class="section-kicker">
+                                RISK CATEGORIES
+                            </div>
+
+
+                            <h2>
+                                Where your contract
+                                needs attention
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div
+                        class="risk-grid"
+                        id="riskGrid"
+                    >
+
+
+                        <!-- LOW -->
+
+                        <button
+                            class="risk-card risk-low"
+                            data-risk="LOW"
+                            type="button"
+                        >
+
+                            <div class="risk-card-top">
+
+                                <span class="risk-pill">
+                                    LOW
+                                </span>
+
+
+                                <span class="risk-arrow">
+                                    ↗
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="risk-count"
+                                id="lowCount"
+                            >
+                                0
+                            </div>
+
+
+                            <h3>
+                                Low risk
+                            </h3>
+
+
+                            <p>
+                                Clauses with limited
+                                signals or comparatively
+                                routine language.
+                            </p>
+
+                        </button>
+
+
+
+                        <!-- MEDIUM -->
+
+                        <button
+                            class="risk-card risk-medium"
+                            data-risk="MEDIUM"
+                            type="button"
+                        >
+
+                            <div class="risk-card-top">
+
+                                <span class="risk-pill">
+                                    MEDIUM
+                                </span>
+
+
+                                <span class="risk-arrow">
+                                    ↗
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="risk-count"
+                                id="mediumCount"
+                            >
+                                0
+                            </div>
+
+
+                            <h3>
+                                Medium risk
+                            </h3>
+
+
+                            <p>
+                                Clauses with provisions
+                                that may deserve a
+                                closer commercial review.
+                            </p>
+
+                        </button>
+
+
+
+                        <!-- HIGH -->
+
+                        <button
+                            class="risk-card risk-high"
+                            data-risk="HIGH"
+                            type="button"
+                        >
+
+                            <div class="risk-card-top">
+
+                                <span class="risk-pill">
+                                    HIGH
+                                </span>
+
+
+                                <span class="risk-arrow">
+                                    ↗
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="risk-count"
+                                id="highCount"
+                            >
+                                0
+                            </div>
+
+
+                            <h3>
+                                High risk
+                            </h3>
+
+
+                            <p>
+                                Clauses containing
+                                stronger signals that
+                                may materially affect you.
+                            </p>
+
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- PRIORITY REVIEW -->
+
+                    <div class="priority-section">
+
+
+                        <div class="section-kicker">
+                            PRIORITY REVIEW
+                        </div>
+
+
+                        <h2>
+                            Clauses to review first
+                        </h2>
+
+
+                        <div
+                            class="priority-grid"
+                            id="priorityGrid"
+                        ></div>
+
+                    </div>
+
+                </section>
+
+
+
+                <!-- ==================================================
+                     CLAUSE GROUP VIEW
+                =================================================== -->
+
+                <section
+                    id="groupView"
+                    class="view hidden"
+                >
+
+
+                    <div class="group-header">
+
+
+                        <div>
+
+
+                            <button
+                                class="back-link"
+                                id="backToOverview"
+                                type="button"
+                            >
+                                ← Back to risk overview
+                            </button>
+
+
+                            <div
+                                class="eyebrow"
+                                id="groupEyebrow"
+                            >
+                                RISK CATEGORY
+                            </div>
+
+
+                            <h1 id="groupTitle">
+                                High risk clauses
+                            </h1>
+
+
+                            <p id="groupSubtitle">
+                                Select a clause to inspect
+                                its current signals.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CLAUSE / DETAIL -->
+
+                    <div class="group-layout">
+
+
+                        <!-- LEFT: CLAUSES -->
+
+                        <div class="clause-area">
+
+
+                            <div class="clause-toolbar">
+
+
+                                <span
+                                    id="groupCountLabel"
+                                >
+                                    0 clauses
+                                </span>
+
+
+                                <span>
+                                    Clause-level findings
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="clause-grid"
+                                id="clauseGrid"
+                            ></div>
+
+                        </div>
+
+
+
+                        <!-- RIGHT: DETAIL -->
+
+                        <aside
+                            class="detail-panel"
+                            id="detailPanel"
+                        >
+
+
+                            <div class="detail-empty">
+
+
+                                <div
+                                    class="detail-empty-mark"
+                                >
+                                    C
+                                </div>
+
+
+                                <h3>
+                                    Select a clause
+                                </h3>
+
+
+                                <p>
+                                    The clause text and
+                                    detected risk signals
+                                    will appear here.
+                                </p>
+
+
+                            </div>
+
+                        </aside>
+
+                    </div>
+</section>
+
+
+                <!-- ==================================================
+                     WATCHTOWER VIEW (embedded in the application shell)
+                =================================================== -->
+                <section
+                    id="watchtowerView"
+                    class="view hidden watchtower-view"
+                    aria-label="Watchtower contract monitoring"
+                    style="display:block;width:100%;height:calc(100dvh - 84px);min-height:540px;overflow:hidden;background:#0A0B0B;"
+                >
+                    <iframe
+                        id="watchtowerFrame"
+                        class="watchtower-frame"
+                        title="ClauseGuard Watchtower"
+                        src="about:blank"
+                        loading="eager"
+                        referrerpolicy="same-origin"
+                        style="display:block;width:100%;height:100%;min-height:540px;border:0;background:#0A0B0B;"
+                    ></iframe>
+                </section>
+
+            </section>
+
+
+            <!-- ==================================================
+                 ASK YOUR CONTRACT VIEW
+            =================================================== -->
+
+            <section
+                id="askContractView"
+                class="view hidden"
+                aria-labelledby="chatPageTitle"
+            >
+                <header class="chat-header">
+                    <div class="chat-header-left">
+                        <div class="chat-heading-overline">
+                            <span class="chat-heading-mark" aria-hidden="true">§</span>
+                            <span>CLAUSEGUARD / CONTRACT ASSISTANT</span>
+                        </div>
+                        <h1 id="chatPageTitle">Ask Your Contract</h1>
+                        <p class="chat-subtitle">
+                            Understand the agreement. Ask questions in plain English.
+                        </p>
+                    </div>
+
+                    <div class="chat-header-right">
+                        <div class="chat-contract-context" aria-live="polite">
+                            <span class="chat-context-status-dot" id="chatContextDot" aria-hidden="true"></span>
+                            <div class="chat-context-copy">
+                                <span class="chat-context-label" id="chatContextLabel">CONTRACT CONTEXT</span>
+                                <strong id="chatContractName">Restoring agreement…</strong>
+                                <span class="chat-context-status" id="chatContextStatus">Loading saved contract</span>
+                            </div>
+                        </div>
+                        <button
+                            class="secondary-btn hidden"
+                            id="clearChatBtn"
+                            type="button"
+                        >
+                            Clear chat
+                        </button>
+                    </div>
+                </header>
+
+                <div class="chat-messages" id="chatMessages" aria-live="polite" aria-relevant="additions text">
+                    <!-- Conversation and empty states are rendered here. -->
+                </div>
+
+                <div class="chat-starter hidden" id="chatStarter">
+                    <div class="starter-heading">
+                        <span class="starter-label">A GOOD PLACE TO START</span>
+                        <span class="starter-supporting-copy">Choose a question or write your own.</span>
+                    </div>
+                    <div class="starter-buttons">
+                        <button class="starter-btn" type="button" data-question="What does indemnification mean?">
+                            <span class="starter-card-title">Explain a clause</span>
+                            <span class="starter-card-copy">Put legal wording into plain English.</span>
+                            <span class="starter-card-arrow" aria-hidden="true">↗</span>
+                        </button>
+                        <button class="starter-btn" type="button" data-question="Can I terminate this contract early?">
+                            <span class="starter-card-title">Understand termination</span>
+                            <span class="starter-card-copy">Check when the agreement can end.</span>
+                            <span class="starter-card-arrow" aria-hidden="true">↗</span>
+                        </button>
+                        <button class="starter-btn" type="button" data-question="What could cost me money?">
+                            <span class="starter-card-title">Find financial exposure</span>
+                            <span class="starter-card-copy">Look for fees, penalties, or costly duties.</span>
+                            <span class="starter-card-arrow" aria-hidden="true">↗</span>
+                        </button>
+                        <button class="starter-btn" type="button" data-question="Are there restrictions on me after I leave?">
+                            <span class="starter-card-title">Check ongoing restrictions</span>
+                            <span class="starter-card-copy">Understand what may continue after termination.</span>
+                            <span class="starter-card-arrow" aria-hidden="true">↗</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <div class="chat-input-wrapper">
+                        <textarea
+                            id="chatInput"
+                            class="chat-input"
+                            placeholder="Ask anything about your agreement…"
+                            rows="1"
+                            aria-label="Ask a question about your contract"
+                        ></textarea>
+                        <button
+                            id="chatSendBtn"
+                            class="chat-send-btn"
+                            type="button"
+                            aria-label="Send message"
+                        >
+                            <span aria-hidden="true">↑</span>
+                        </button>
+                    </div>
+                    <p class="chat-composer-note">Review AI responses against the original agreement. ClauseGuard does not replace legal advice.</p>
+                </div>
+            </section>
+
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="/static/app.js"></script>
+
+    <script src="/static/theme-toggle.js"></script>
+
+</body>
+
+</html>

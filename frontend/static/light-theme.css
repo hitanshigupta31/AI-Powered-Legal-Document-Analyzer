@@ -1,0 +1,678 @@
+/*
+ * ClauseGuard optional light appearance.
+ * Loaded after style.css / watchtower.css. No application behaviour is changed.
+ */
+html[data-theme="light"] {
+    color-scheme: light;
+    --cg-ink: #F4F1E9;
+    --cg-ink-2: #FAF8F3;
+    --cg-panel: #FFFFFF;
+    --cg-panel-2: #F7F4EC;
+    --cg-panel-3: #EEE8DC;
+    --cg-ivory: #292A24;
+    --cg-paper: #37382F;
+    --cg-stone: #686A60;
+    --cg-stone-2: #7B7D72;
+    --cg-brass: #826B35;
+    --cg-brass-light: #A1874C;
+    --cg-brass-soft: rgba(130, 107, 53, .12);
+    --cg-line: rgba(41, 42, 36, .13);
+    --cg-line-strong: rgba(41, 42, 36, .23);
+    --cg-high: #B44E47;
+    --cg-medium: #946C23;
+    --cg-low: #397553;
+    --cg-border: rgba(41, 42, 36, .13);
+    --cg-border-strong: rgba(41, 42, 36, .23);
+    --bg: #F4F1E9;
+    --surface: #FFFFFF;
+    --surface-raised: #F7F4EC;
+    --surface-hover: #EEE8DC;
+    --text: #292A24;
+    --muted: #686A60;
+    --muted-2: #7B7D72;
+    --line: rgba(41, 42, 36, .13);
+    --line-strong: rgba(41, 42, 36, .23);
+    --acid: #826B35;
+    --acid-soft: rgba(130, 107, 53, .12);
+    --warning: #946C23;
+    --danger: #B44E47;
+}
+
+html[data-theme="light"] body,
+html[data-theme="light"] .app-shell,
+html[data-theme="light"] .main-area,
+html[data-theme="light"] .page-content,
+html[data-theme="light"] body.auth-page,
+html[data-theme="light"] .auth-shell,
+html[data-theme="light"] .auth-form-panel,
+html[data-theme="light"] body.public-page {
+    color: var(--cg-ivory);
+    background-color: var(--cg-ink);
+}
+
+html[data-theme="light"] {
+    scrollbar-color: #C7C0B2 #F4F1E9;
+}
+html[data-theme="light"] ::selection {
+    color: #FFFFFF;
+    background: #826B35;
+}
+html[data-theme="light"] .sidebar {
+    background: #EEEAE0;
+    border-right-color: var(--cg-line);
+}
+html[data-theme="light"] .topbar {
+    background: rgba(250, 248, 243, .94);
+    border-bottom-color: var(--cg-line);
+}
+html[data-theme="light"] .topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+html[data-theme="light"] .nav-item:hover,
+html[data-theme="light"] .sidebar-logout:hover {
+    color: var(--cg-ivory);
+    background: rgba(41, 42, 36, .045);
+}
+html[data-theme="light"] .upload-card {
+    background: linear-gradient(145deg, #FFFFFF, #F5F1E8);
+}
+html[data-theme="light"] .dropzone {
+    color: var(--cg-ivory);
+    background: rgba(41, 42, 36, .018);
+    border-color: rgba(41, 42, 36, .25);
+}
+html[data-theme="light"] .dropzone:hover,
+html[data-theme="light"] .dropzone:focus-visible,
+html[data-theme="light"] .dropzone.dragover,
+html[data-theme="light"] .dropzone.drag-over {
+    background: rgba(130, 107, 53, .07);
+}
+html[data-theme="light"] .risk-pill,
+html[data-theme="light"] .clause-risk,
+html[data-theme="light"] .priority-score,
+html[data-theme="light"] #groupView .risk-chip,
+html[data-theme="light"] #groupView .score-chip {
+    background: rgba(41, 42, 36, .035);
+}
+html[data-theme="light"] .primary-btn,
+html[data-theme="light"] .topbar-action,
+html[data-theme="light"] .auth-submit,
+html[data-theme="light"] .cg-button-primary,
+html[data-theme="light"] .brand-mark,
+html[data-theme="light"] .public-brand-mark,
+html[data-theme="light"] .processing-mark,
+html[data-theme="light"] .chat-send-btn,
+html[data-theme="light"] .history-download-btn {
+    color: #FFFFFF;
+}
+html[data-theme="light"] .primary-btn:disabled {
+    color: #77766E;
+    background: #E4E0D6;
+    border-color: #E4E0D6;
+}
+html[data-theme="light"] .secondary-btn:hover {
+    background: rgba(41, 42, 36, .045);
+}
+html[data-theme="light"] .progress-track {
+    background: #E4E0D6;
+}
+html[data-theme="light"] .chat-input-area {
+    background: linear-gradient(to bottom, rgba(244, 241, 233, .9), var(--cg-ink) 32%);
+}
+html[data-theme="light"] .chat-contract-context {
+    background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(247,244,236,.98));
+}
+html[data-theme="light"] .chat-message.assistant .chat-message-content,
+html[data-theme="light"] .chat-loading {
+    color: var(--cg-ivory);
+    background: linear-gradient(145deg, #FFFFFF, #F5F1E8);
+    border-color: var(--cg-line);
+}
+html[data-theme="light"] .chat-message.user .chat-message-content {
+    color: var(--cg-ivory);
+    background: rgba(130, 107, 53, .12);
+    border-color: rgba(130, 107, 53, .2);
+}
+html[data-theme="light"] .chat-input-wrapper {
+    background: linear-gradient(145deg, #FFFFFF, #F7F4EC);
+    border-color: var(--cg-line-strong);
+}
+html[data-theme="light"] #askContractView .chat-empty-state--no-contract,
+html[data-theme="light"] #askContractView .starter-btn {
+    background: linear-gradient(145deg, #FFFFFF, #F7F4EC);
+    border-color: var(--cg-line);
+}
+html[data-theme="light"] #askContractView .starter-btn:hover {
+    background: linear-gradient(145deg, #F7F4EC, #EEE8DC);
+}
+html[data-theme="light"] #askContractView .chat-message-sources .source-item {
+    background: #F0ECE3;
+}
+html[data-theme="light"] .auth-brand-panel {
+    background: radial-gradient(ellipse at 15% 14%, rgba(130,107,53,.13), transparent 38%), radial-gradient(ellipse at 80% 85%, rgba(130,107,53,.06), transparent 38%), #EEEAE0;
+    border-right-color: var(--cg-line);
+}
+html[data-theme="light"] .public-header {
+    background: rgba(250, 248, 243, .94);
+    border-bottom-color: var(--cg-line);
+}
+html[data-theme="light"] .public-grain {
+    opacity: .025;
+    background-image: repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(41,42,36,.018) 4px);
+}
+html[data-theme="light"] .public-hero::before {
+    background: radial-gradient(ellipse, rgba(130,107,53,.08), transparent 68%);
+}
+html[data-theme="light"] .public-dark-act {
+    color: var(--cg-ivory);
+    background: #EAE5D9;
+}
+html[data-theme="light"] .hero-art-window,
+html[data-theme="light"] .public-document-stage,
+html[data-theme="light"] .finding-stack,
+html[data-theme="light"] .signal-preview {
+    color: var(--cg-ivory);
+    background: #FFFFFF;
+    border-color: var(--cg-line-strong);
+}
+html[data-theme="light"] .sample-insight {
+    color: var(--cg-ivory);
+    background: #F4F1E9;
+    border-color: var(--cg-line);
+}
+html[data-theme="light"] .sample-highlight {
+    background: rgba(130,107,53,.12);
+    border-color: rgba(130,107,53,.24);
+}
+html[data-theme="light"] .sample-highlight i {
+    background: rgba(41,42,36,.14);
+}
+html[data-theme="light"] .hero-art-footer {
+    color: var(--cg-stone);
+    background: #EEEAE0;
+    border-color: var(--cg-line);
+}
+html[data-theme="light"] .hero-floating-note {
+    color: var(--cg-ivory);
+    background: #FFFFFF;
+    border-color: var(--cg-line-strong);
+}
+html[data-theme="light"] .sample-risk-block {
+    background: rgba(130,107,53,.075);
+    border-color: rgba(130,107,53,.19);
+}
+html[data-theme="light"] .doc-section-label.flagged {
+    background: rgba(130,107,53,.10);
+}
+html[data-theme="light"] .doc-line-group i {
+    background: rgba(41,42,36,.12);
+}
+html[data-theme="light"] .flagged-lines i {
+    background: rgba(130,107,53,.34);
+}
+html[data-theme="light"] .finding-row:hover {
+    background: rgba(41,42,36,.035);
+}
+html[data-theme="light"] .signal-preview-grid article {
+    background: rgba(41,42,36,.025);
+    border-color: var(--cg-line);
+}
+html[data-theme="light"] .public-closing {
+    background: radial-gradient(ellipse at 50% 100%, rgba(130,107,53,.09), transparent 57%), #EAE5D9;
+}
+html[data-theme="light"] #groupView .detail-panel {
+    color: var(--cg-ivory);
+    background: radial-gradient(ellipse at 100% 0%, rgba(130,107,53,.06), transparent 43%), linear-gradient(145deg, #FFFFFF, #F4F1E9 75%);
+}
+html[data-theme="light"] #groupView .clause-card.active {
+    background: linear-gradient(135deg, rgba(130,107,53,.12), rgba(130,107,53,.04));
+}
+html[data-theme="light"] #groupView .clause-card-arrow,
+html[data-theme="light"] #groupView .detail-evidence-card,
+html[data-theme="light"] #groupView .clause-source-details[open] .source-summary-arrow,
+html[data-theme="light"] #groupView .ai-result-section,
+html[data-theme="light"] #groupView .ai-result-disclosure,
+html[data-theme="light"] #groupView .review-path-count,
+html[data-theme="light"] #groupView .review-path-number {
+    background: rgba(41,42,36,.035);
+}
+html[data-theme="light"] #groupView .ai-placeholder {
+    background: radial-gradient(ellipse at 100% 0%, rgba(130,107,53,.1), transparent 58%), linear-gradient(145deg, rgba(130,107,53,.07), rgba(41,42,36,.015));
+}
+html[data-theme="light"] #groupView .clause-source-full,
+html[data-theme="light"] #groupView .ai-rewrite-box {
+    color: #34352D;
+    background: #F0ECE3;
+    border-color: var(--cg-line);
+}
+html[data-theme="light"] #groupView .detail-panel::-webkit-scrollbar-track {
+    background: rgba(41,42,36,.03);
+}
+html[data-theme="light"] #groupView .detail-panel::-webkit-scrollbar-thumb {
+    background: rgba(130,107,53,.35);
+}
+html[data-theme="light"] #groupView .clause-preview,
+html[data-theme="light"] #groupView .ai-prompt-copy,
+html[data-theme="light"] #groupView .detail-list,
+html[data-theme="light"] #groupView .clause-text-preview,
+html[data-theme="light"] #groupView .ai-result-section p,
+html[data-theme="light"] #groupView .ai-result-section ul,
+html[data-theme="light"] #groupView .ai-error-state p,
+html[data-theme="light"] #groupView .ai-result-lead,
+html[data-theme="light"] #groupView .ai-result-why p,
+html[data-theme="light"] #groupView .ai-review-list li,
+html[data-theme="light"] #groupView .ai-suggestion-list li,
+html[data-theme="light"] #groupView .review-path-step h4 {
+    color: var(--cg-stone);
+}
+html[data-theme="light"] #watchtowerView:not(.hidden),
+html[data-theme="light"] #watchtowerFrame {
+    background: var(--cg-ink) !important;
+}
+
+/* Watchtower is embedded in an iframe and also works as a standalone page. */
+html[data-theme="light"] .watchtower-shell,
+html[data-theme="light"] .watchtower-shell main {
+    color: var(--text);
+}
+html[data-theme="light"] .clause-row:hover,
+html[data-theme="light"] .recent-item:hover:not(:disabled) {
+    background: rgba(41,42,36,.04);
+}
+html[data-theme="light"] .clause-row.active {
+    background: linear-gradient(90deg, rgba(130,107,53,.14), rgba(130,107,53,.035));
+}
+html[data-theme="light"] .deadline-card {
+    background: rgba(41,42,36,.045);
+    border-color: var(--line);
+}
+html[data-theme="light"] .modal-card,
+html[data-theme="light"] .backend-error {
+    color: var(--text);
+    background: #FFFFFF;
+    border-color: var(--line-strong);
+}
+html[data-theme="light"] .priority-alert {
+    background: linear-gradient(110deg, rgba(148,108,35,.10), transparent 70%), #F7F2E4;
+    border-color: rgba(148,108,35,.25);
+}
+html[data-theme="light"] .alert-confirmation {
+    background: rgba(180,78,71,.055);
+}
+html[data-theme="light"] .modal-evidence {
+    background: #F2EEE5;
+    border-color: var(--line);
+}
+html[data-theme="light"] .error-banner {
+    background: rgba(180,78,71,.06);
+    border-color: rgba(180,78,71,.24);
+}
+
+/* Theme switch: deliberately small so it does not alter the existing layout. */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 12px;
+    color: var(--cg-ivory, var(--text, #F2F0E9));
+    background: transparent;
+    border: 1px solid var(--cg-line-strong, var(--line-strong, rgba(242,240,233,.20)));
+    border-radius: 7px;
+    font: 600 10px/1.2 var(--cg-sans, var(--sans, Inter, sans-serif));
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 180ms ease, background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+.theme-toggle:hover {
+    background: var(--cg-brass-soft, var(--acid-soft, rgba(183,161,107,.11)));
+    border-color: var(--cg-brass, var(--acid, #B7A16B));
+    transform: translateY(-1px);
+}
+.theme-toggle-icon { color: var(--cg-brass, var(--acid, #B7A16B)); font-size: 16px; line-height: 1; }
+.theme-toggle-label { display: inline; }
+.auth-form-panel { position: relative; }
+.theme-toggle-auth { position: absolute; top: 24px; right: 24px; z-index: 5; }
+.theme-toggle-watchtower { flex: 0 0 auto; }
+html[data-theme="light"] .theme-toggle {
+    color: var(--cg-ivory, var(--text, #292A24));
+    background: rgba(255,255,255,.65);
+    border-color: var(--cg-line-strong, var(--line-strong, rgba(41,42,36,.23)));
+}
+html[data-theme="light"] .theme-toggle:hover { background: #FFFFFF; }
+
+@media (max-width: 1080px) {
+    .theme-toggle-label { display: none; }
+    .theme-toggle { width: 39px; min-width: 39px; padding-inline: 0; }
+}
+@media (max-width: 760px) {
+    .theme-toggle-auth { top: 16px; right: 16px; }
+}
+
+/* Additional explicit surfaces and text tones that were intentionally fixed in dark mode. */
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+html[data-theme="light"] .history-card {
+    color: var(--cg-ivory);
+    background: linear-gradient(145deg, rgba(255,255,255,.98), rgba(247,244,236,.98));
+    border-color: var(--cg-line);
+    box-shadow: 0 14px 35px rgba(47,42,30,.055);
+}
+html[data-theme="light"] .history-card:hover {
+    background: linear-gradient(145deg, #FFFFFF, #F1EDE3);
+}
+html[data-theme="light"] .history-empty-state {
+    color: var(--cg-stone);
+    background: rgba(41,42,36,.025);
+    border-color: var(--cg-line);
+}
+html[data-theme="light"] .history-risk-pill {
+    background: rgba(41,42,36,.04);
+}
+html[data-theme="light"] .history-risk-pill.risk-high {
+    background: rgba(180,78,71,.08);
+}
+html[data-theme="light"] .history-risk-pill.risk-medium {
+    background: rgba(148,108,35,.08);
+}
+html[data-theme="light"] .history-risk-pill.risk-low {
+    background: rgba(57,117,83,.08);
+}
+html[data-theme="light"] .chat-input-area {
+    border-top-color: var(--cg-line);
+}
+html[data-theme="light"] #groupView .ai-result-why,
+html[data-theme="light"] #groupView .ai-result-disclosure:hover,
+html[data-theme="light"] #groupView .ai-result-disclosure[open],
+html[data-theme="light"] #groupView .ai-disclosure-symbol,
+html[data-theme="light"] #groupView .ai-disclosure-count,
+html[data-theme="light"] #groupView .ai-result-number,
+html[data-theme="light"] #groupView .ai-review-index,
+html[data-theme="light"] #groupView .ai-rewrite-section,
+html[data-theme="light"] #groupView .review-path-step {
+    background: rgba(41,42,36,.035);
+    border-color: var(--cg-line);
+}
+html[data-theme="light"] #groupView .ai-result-why p,
+html[data-theme="light"] #groupView .ai-review-list li,
+html[data-theme="light"] #groupView .ai-suggestion-list li,
+html[data-theme="light"] #groupView .ai-result-lead,
+html[data-theme="light"] #groupView .review-path-step h4,
+html[data-theme="light"] #groupView .ai-rewrite-box {
+    color: var(--cg-ivory);
+}
+html[data-theme="light"] .error-banner,
+html[data-theme="light"] .auth-error {
+    color: var(--cg-high);
+    background: rgba(180,78,71,.06);
+    border-color: rgba(180,78,71,.23);
+}
+html[data-theme="light"] .auth-error.success {
+    color: var(--cg-low);
+    background: rgba(57,117,83,.07);
+    border-color: rgba(57,117,83,.22);
+}
+html[data-theme="light"] .sidebar-status .status-dot,
+html[data-theme="light"] .status-dot {
+    box-shadow: 0 0 0 4px rgba(57,117,83,.08);
+}
+html[data-theme="light"] .reading-spine-track,
+html[data-theme="light"] .reading-spine-progress {
+    background: rgba(41,42,36,.14);
+}
+html[data-theme="light"] ::-webkit-scrollbar-track {
+    background: #F4F1E9;
+}
+html[data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: #C6BEAF;
+    border-color: #F4F1E9;
+}
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+    background: #A69B85;
+}
+html[data-theme="light"] .action-feedback,
+html[data-theme="light"] .watchtower-action-feedback {
+    color: var(--cg-ivory);
+    background: #FFFFFF;
+    border-color: var(--cg-line-strong);
+}
+
+/* Watchtower's light mode uses the same warm paper palette while preserving status colors. */
+html[data-theme="light"] .deadline-card {
+    color: var(--text);
+}
+html[data-theme="light"] .modal-backdrop {
+    background: rgba(30, 29, 25, .48);
+}
+html[data-theme="light"] .action-feedback {
+    background: #FFFFFF;
+}
+html[data-theme="light"] .backend-error {
+    background: #FFFFFF;
+}
+html[data-theme="light"] #groupView .clause-card-arrow,
+html[data-theme="light"] #groupView .ai-mark,
+html[data-theme="light"] #groupView .ai-analyze-btn,
+html[data-theme="light"] #groupView .ai-button-arrow {
+    color: #292A24;
+}
+html[data-theme="light"] #groupView .ai-button-arrow {
+    background: rgba(41,42,36,.06);
+    border-color: rgba(41,42,36,.12);
+}
+html[data-theme="light"] #groupView .ai-loading-spinner {
+    border-color: rgba(41,42,36,.18);
+    border-top-color: var(--cg-brass);
+}
+html[data-theme="light"] .primary-btn:hover:not(:disabled),
+html[data-theme="light"] .topbar-action:hover,
+html[data-theme="light"] .auth-submit:hover:not(:disabled),
+html[data-theme="light"] .cg-button-primary:hover,
+html[data-theme="light"] .history-download-btn:hover {
+    color: #292A24;
+}
+
+/* ============================================================
+   LIGHT THEME COMPLETION FIXES
+   Override high-specificity, dark-only chat and Watchtower surfaces.
+   Presentation only: no API, chat, monitoring, or data logic changes.
+============================================================ */
+html[data-theme="light"] #askContractView .chat-message.assistant .chat-message-content,
+html[data-theme="light"] #askContractView .chat-loading {
+    color: #292A24 !important;
+    background: linear-gradient(145deg, #FFFFFF, #F5F1E8) !important;
+    border-color: rgba(41, 42, 36, .14) !important;
+    box-shadow: 0 8px 22px rgba(41, 42, 36, .045);
+}
+
+html[data-theme="light"] #askContractView .chat-message-text,
+html[data-theme="light"] #askContractView .chat-message-text p,
+html[data-theme="light"] #askContractView .chat-message-text li,
+html[data-theme="light"] #askContractView .chat-message-text strong,
+html[data-theme="light"] #askContractView .chat-message-text blockquote {
+    color: #292A24;
+}
+
+html[data-theme="light"] #askContractView .chat-message.user .chat-message-content {
+    color: #292A24 !important;
+    background: rgba(130, 107, 53, .10) !important;
+    border-color: rgba(130, 107, 53, .22) !important;
+}
+
+html[data-theme="light"] #askContractView .chat-empty-state--no-contract {
+    color: #292A24;
+    background: linear-gradient(145deg, #FFFFFF, #F7F4EC) !important;
+    border-color: rgba(41, 42, 36, .14) !important;
+}
+
+html[data-theme="light"] #askContractView .chat-empty-state--no-contract .chat-empty-title,
+html[data-theme="light"] #askContractView .chat-empty-state--no-contract .chat-empty-text {
+    color: #292A24;
+}
+
+html[data-theme="light"] #askContractView .starter-btn,
+html[data-theme="light"] #askContractView .follow-up-btn {
+    color: #292A24 !important;
+    background: linear-gradient(145deg, #FFFFFF, #F7F4EC) !important;
+    border-color: rgba(41, 42, 36, .14) !important;
+}
+
+html[data-theme="light"] #askContractView .starter-btn:hover,
+html[data-theme="light"] #askContractView .follow-up-btn:hover {
+    background: linear-gradient(145deg, #F7F4EC, #EEE8DC) !important;
+    border-color: rgba(130, 107, 53, .30) !important;
+}
+
+html[data-theme="light"] #askContractView .starter-card-title,
+html[data-theme="light"] #askContractView .starter-card-copy,
+html[data-theme="light"] #askContractView .starter-supporting-copy {
+    color: #292A24;
+}
+
+html[data-theme="light"] #askContractView .chat-message-sources .source-item {
+    color: #292A24;
+    background: #F0ECE3 !important;
+    border-color: rgba(41, 42, 36, .12) !important;
+}
+
+html[data-theme="light"] #askContractView .chat-message-sources .source-evidence {
+    color: #686A60;
+    border-top-color: rgba(41, 42, 36, .12);
+}
+
+html[data-theme="light"] #askContractView .chat-messages {
+    scrollbar-color: #C6BEAF transparent;
+}
+html[data-theme="light"] #askContractView .chat-messages::-webkit-scrollbar-thumb {
+    background: #C6BEAF !important;
+}
+
+/* Watchtower's clause list had a dark background hard-coded in the base CSS. */
+html[data-theme="light"] .clause-area {
+    color: #292A24 !important;
+    background: linear-gradient(140deg, rgba(130, 107, 53, .035), transparent 60%), #FFFFFF !important;
+    border-color: rgba(41, 42, 36, .18) !important;
+    box-shadow: 0 12px 30px rgba(41, 42, 36, .055);
+}
+
+html[data-theme="light"] .clause-header,
+html[data-theme="light"] .clause-subtitle,
+html[data-theme="light"] .remaining-clauses {
+    border-color: rgba(41, 42, 36, .12) !important;
+}
+
+html[data-theme="light"] .clause-subtitle,
+html[data-theme="light"] .remaining-clauses,
+html[data-theme="light"] .remaining-clauses strong,
+html[data-theme="light"] .clause-placeholder {
+    color: #686A60 !important;
+}
+
+html[data-theme="light"] .clause-row {
+    color: #292A24 !important;
+    border-bottom-color: rgba(41, 42, 36, .10) !important;
+}
+html[data-theme="light"] .clause-row:hover,
+html[data-theme="light"] .clause-row.active {
+    background: linear-gradient(90deg, rgba(130, 107, 53, .12), rgba(130, 107, 53, .025)) !important;
+}
+html[data-theme="light"] .clause-information > strong {
+    color: #292A24;
+}
+html[data-theme="light"] .clause-information > small {
+    color: #686A60;
+}
+html[data-theme="light"] .clause-status {
+    color: #686A60;
+}
+html[data-theme="light"] .deadline-card {
+    color: #292A24 !important;
+    background: #F7F4EC !important;
+    border-color: rgba(41, 42, 36, .14) !important;
+}
+html[data-theme="light"] .deadline-card > strong {
+    color: #292A24;
+}
+html[data-theme="light"] .rule-card {
+    color: #292A24;
+    background: linear-gradient(135deg, rgba(130, 107, 53, .045), transparent 80%), #FFFFFF !important;
+    border-color: rgba(130, 107, 53, .30) !important;
+}
+html[data-theme="light"] .event-card {
+    background: linear-gradient(135deg, rgba(130, 107, 53, .035), transparent 80%), #FFFFFF !important;
+}
+html[data-theme="light"] .map-trace,
+html[data-theme="light"] .selected-trace {
+    color: #292A24;
+    border-color: rgba(41, 42, 36, .14);
+}
+html[data-theme="light"] .selected-trace {
+    background: #F7F4EC !important;
+}
+html[data-theme="light"] .selected-trace > div strong {
+    color: #292A24;
+}
+html[data-theme="light"] .selected-trace p,
+html[data-theme="light"] .selected-trace small {
+    color: #686A60;
+}
+html[data-theme="light"] .contract-map .clause-area,
+html[data-theme="light"] .contract-map .clause-area.motion-child {
+    background-color: #FFFFFF !important;
+}
+
+/* Chat composer had a dark-only surface with higher specificity than the original light rules. */
+html[data-theme="light"] #askContractView .chat-input-area {
+    background: linear-gradient(to bottom, rgba(244, 241, 233, .92), #F4F1E9 34%) !important;
+    border-top-color: rgba(41, 42, 36, .12) !important;
+}
+html[data-theme="light"] #askContractView .chat-input-wrapper {
+    color: #292A24 !important;
+    background: linear-gradient(145deg, #FFFFFF, #F7F4EC) !important;
+    border-color: rgba(41, 42, 36, .20) !important;
+    box-shadow: 0 8px 22px rgba(41, 42, 36, .06) !important;
+}
+html[data-theme="light"] #askContractView .chat-input-wrapper:focus-within {
+    border-color: rgba(130, 107, 53, .65) !important;
+    box-shadow: 0 0 0 3px rgba(130, 107, 53, .10), 0 8px 22px rgba(41, 42, 36, .06) !important;
+}
+html[data-theme="light"] #askContractView .chat-input {
+    color: #292A24 !important;
+    background: transparent !important;
+    caret-color: #292A24;
+}
+html[data-theme="light"] #askContractView .chat-input::placeholder {
+    color: #7B7D72 !important;
+    opacity: 1;
+}
+html[data-theme="light"] #askContractView .chat-composer-note {
+    color: #686A60 !important;
+}
+html[data-theme="light"] #askContractView .chat-send-btn {
+    color: #FFFFFF !important;
+    background: #826B35 !important;
+    border-color: #826B35 !important;
+}
+html[data-theme="light"] #askContractView .chat-send-btn:hover {
+    background: #705B2B !important;
+}
+html[data-theme="light"] #askContractView .chat-contract-context {
+    color: #292A24;
+    background: linear-gradient(145deg, #FFFFFF, #F7F4EC) !important;
+    border-color: rgba(41, 42, 36, .14) !important;
+}
+html[data-theme="light"] #askContractView .chat-context-copy strong {
+    color: #292A24 !important;
+}
+html[data-theme="light"] #askContractView .chat-context-status {
+    color: #686A60 !important;
+}
+
+

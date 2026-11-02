@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0A0B0B">
+    <title>ClauseGuard — Watchtower</title>
+    <script>
+        if (new URLSearchParams(window.location.search).get("embedded") === "1") {
+            document.documentElement.classList.add("watchtower-embedded");
+        }
+    </script>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem("clauseguard.theme");
+                document.documentElement.setAttribute("data-theme", savedTheme === "light" ? "light" : "dark");
+            } catch (error) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="watchtower.css">
+    <link rel="stylesheet" href="/static/light-theme.css">
+</head>
+
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<main class="watchtower-shell">
+
+    <!-- TOP BAR -->
+    <header class="topbar motion-topbar">
+        <div class="brand">
+            <span class="brand-mark"></span>
+            <span>CLAUSEGUARD</span>
+            <span class="slash">/</span>
+            <span class="section-label">WATCHTOWER</span>
+        </div>
+
+        <div class="topbar-status">
+            <span class="status-dot"></span>
+            <span>MONITORING ACTIVE</span>
+            <span class="status-time">LIVE</span>
+        </div>
+        <button class="theme-toggle theme-toggle-watchtower" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme" title="Switch to light theme">
+            <span class="theme-toggle-icon" aria-hidden="true">☼</span>
+            <span class="theme-toggle-label">Light theme</span>
+        </button>
+    </header>
+
+
+    <!-- 01. OPENING HERO -->
+    <section class="intro reveal" id="intro">
+        <div class="intro-title">
+            <p class="eyebrow">CONTRACT INTELLIGENCE · 01</p>
+            <h1>The contract,<br><em>in motion.</em></h1>
+        </div>
+
+        <div class="intro-copy">
+            <p>
+                Watchtower continuously connects contractual
+                obligations with the events that may affect them,
+                surfacing the relevant clause, contractual rule
+                and important dates.
+            </p>
+
+            <div class="contract-meta" id="contractMeta">
+                <span>LOADING CONTRACT</span>
+                <span>·</span>
+                <span>LIVE WATCHTOWER DATA</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- 02. CONTRACT STATE -->
+    <section
+        class="state-section reveal"
+        id="contractState"
+        aria-labelledby="stateTitle"
+    >
+        <div class="section-heading-large">
+            <div>
+                <p class="eyebrow">CONTRACT STATE · 02</p>
+                <h2 id="stateTitle">
+                    Is anything <em>happening?</em>
+                </h2>
+            </div>
+
+            <p id="stateDescription">
+                Watchtower evaluates monitored provisions and
+                surfaces changes that require attention.
+            </p>
+        </div>
+
+        <div class="state-grid">
+            <div class="state-overview">
+                <span class="micro-label">CURRENT STATE</span>
+
+                <strong id="stateIndicator">
+                    <span class="state-live-dot"></span>
+                    LOADING
+                </strong>
+
+                <p id="stateSummary">
+                    Retrieving the current Watchtower state.
+                </p>
+            </div>
+
+            <div class="state-metric">
+                <strong id="monitoredCount">—</strong>
+                <span>MONITORS<br>CONFIGURED</span>
+            </div>
+
+            <div class="state-metric">
+                <strong id="activeCount">—</strong>
+                <span>MONITORS<br>ACTIVE</span>
+            </div>
+
+            <div class="state-metric">
+                <strong id="eventCount">—</strong>
+                <span>EVENTS<br>RECORDED</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- 03. CONTRACT SIGNAL MAP -->
+    <section
+        class="contract-map reveal"
+        id="contractMap"
+        aria-labelledby="mapTitle"
+    >
+        <div class="map-label">
+            <span>CONTRACT SIGNAL MAP</span>
+            <span id="mapContractLabel">LIVE DATA</span>
+        </div>
+
+        <div class="map-layout">
+
+            <!-- EVENT -->
+            <aside class="event-column motion-child">
+                <p class="micro-label">03 / EVENT</p>
+
+                <div class="event-card">
+                    <span class="event-accent"></span>
+
+                    <div class="event-content">
+                        <span class="micro-label">EVENT DETECTED</span>
+                        <strong id="eventTitle">—</strong>
+                        <small id="eventDate">—</small>
+                    </div>
+                </div>
+
+                <div class="event-note">
+                    <span class="micro-label">REAL-WORLD SIGNAL</span>
+                    <p id="eventDescription">
+                        Select a monitored provision to inspect
+                        its associated Watchtower information.
+                    </p>
+                </div>
+            </aside>
+
+
+            <!-- CLAUSE BLOCKS -->
+            <section class="clause-area motion-child" aria-labelledby="mapTitle">
+                <header class="clause-header">
+                    <div>
+                        <span class="micro-label">MONITORED PROVISIONS</span>
+                        <h2 id="mapTitle">Watchtower Monitor</h2>
+                    </div>
+
+                    <strong id="clauseHeaderCount">00</strong>
+                </header>
+
+                <p class="clause-subtitle">
+                    Select a provision to view its current monitoring state.
+                </p>
+
+                <div
+                    id="clauseList"
+                    class="clause-list"
+                    aria-live="polite"
+                >
+                    <div class="clause-placeholder">
+                        Loading monitored provisions…
+                    </div>
+                </div>
+
+                <footer class="remaining-clauses" id="remainingClauses">
+                    <span>LOADING CONTRACT CLAUSES</span>
+                    <strong>—</strong>
+                </footer>
+            </section>
+
+
+            <!-- RULE AND DEADLINE -->
+            <aside class="rule-column motion-child">
+                <div class="rule-group">
+                    <p class="micro-label">CONTRACTUAL RULE</p>
+
+                    <div class="rule-card">
+                        <strong id="ruleValue">—</strong>
+                        <span id="ruleDescription">
+                            Waiting for contractual rule.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="rule-connector" aria-hidden="true"></div>
+
+                <div class="deadline-card">
+                    <span class="micro-label" id="deadlineLabel">
+                        CONTRACTUAL DEADLINE
+                    </span>
+
+                    <strong id="deadlineValue">—</strong>
+
+                    <small id="deadlineSource">
+                        No deadline currently available.
+                    </small>
+                </div>
+            </aside>
+
+        </div>
+
+        <!-- COMPACT TRACE -->
+        <div class="map-trace">
+            <span class="micro-label">WATCHTOWER TRACE</span>
+
+            <div class="trace-sequence">
+                <span>EVENT</span>
+                <i aria-hidden="true">→</i>
+                <span>CLAUSE</span>
+                <i aria-hidden="true">→</i>
+                <span>RULE</span>
+                <i aria-hidden="true">→</i>
+                <span>DEADLINE</span>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- 04. SMALL CONTRACT SOURCE STRIP -->
+    <section class="source-strip reveal" id="contractSource">
+        <div class="source-strip-copy">
+            <span class="micro-label">CONTRACT SOURCE</span>
+            <p>
+                Need to verify the wording? Inspect the source
+                associated with the selected provision.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="source-button"
+            id="evidenceButton"
+        >
+            VIEW CONTRACT SOURCE
+            <span aria-hidden="true">↗</span>
+        </button>
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer class="page-footer reveal">
+        <span>CLAUSEGUARD / WATCHTOWER</span>
+        <span>CONTRACTUAL MONITORING · LIVE DATA</span>
+    </footer>
+
+</main>
+
+
+<!-- CONTRACT SOURCE MODAL -->
+<div
+    class="evidence-modal"
+    id="evidenceModal"
+    aria-hidden="true"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+>
+    <button
+        type="button"
+        class="modal-backdrop"
+        data-close-modal
+        aria-label="Close contract source"
+        tabindex="-1"
+    ></button>
+
+    <section class="modal-card">
+        <button
+            type="button"
+            class="modal-close"
+            data-close-modal
+            aria-label="Close"
+        >×</button>
+
+        <p class="eyebrow" id="modalEyebrow">CONTRACT SOURCE</p>
+
+        <h2 id="modalTitle">Contractual provision</h2>
+
+        <p class="modal-lead" id="modalLead">
+            Source text associated with the selected provision.
+        </p>
+
+        <div class="modal-evidence">
+            <span class="micro-label">SOURCE TEXT</span>
+            <blockquote id="modalEvidence">
+                Loading source text.
+            </blockquote>
+        </div>
+
+        <div class="modal-grid">
+            <div>
+                <span>EVENT</span>
+                <strong id="modalEvent">—</strong>
+            </div>
+
+            <div>
+                <span>CLAUSE</span>
+                <strong id="modalClause">—</strong>
+            </div>
+
+            <div>
+                <span>WATCHTOWER RESULT</span>
+                <strong id="modalResult">—</strong>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<!-- ERROR MESSAGE -->
+<div
+    class="backend-error"
+    id="watchtowerBackendError"
+    role="alert"
+    hidden
+>
+    <strong>WATCHTOWER DATA UNAVAILABLE</strong>
+    <span id="watchtowerErrorMessage"></span>
+</div>
+
+
+<script src="watchtower-api.js"></script>
+<script src="watchtower.js"></script>
+<script src="/static/theme-toggle.js"></script>
+
+</body>
+</html>

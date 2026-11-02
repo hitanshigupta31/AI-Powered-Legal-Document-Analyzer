@@ -1,0 +1,1899 @@
+diff --git a/backend/app/ai_service.py b/backend/app/ai_service.py
+index 6a66855..b0fbcb9 100644
+--- a/backend/app/ai_service.py
++++ b/backend/app/ai_service.py
+@@ -1363,10 +1363,625 @@ Return ONLY the required JSON object.
+         follow_up_suggestions = []
+     follow_up_suggestions = [str(s).strip() for s in follow_up_suggestions if str(s).strip()][:3]
+     
++    # ============================================================
++# AI INVESTIGATION SERVICE
++# ============================================================
++
++INVESTIGATION_SYSTEM_PROMPT = """
++You are ClauseGuard, an AI investigator for contract analysis.
++
++Your task is to conduct a structured investigation of a specific contract clause.
++You will be given:
++- The target clause being investigated
++- All other clauses in the contract for context
++- The detected risk signals for the target clause
++
++Your job is to produce a structured investigation object that will be used
++to drive a visual investigation sequence in the UI.
++
++The investigation must be grounded in the provided contract text.
++Do not invent facts, clauses, or signals that are not in the evidence.
++
++OUTPUT FORMAT:
++Return a JSON object with exactly these fields:
++
++{
++  "finding": {
++    "clause_id": "...",
++    "title": "...",
++    "type": "...",
++    "risk_level": "...",
++    "risk_score": 0,
++    "risk_flags": ["..."],
++    "risk_reasons": ["..."]
++  },
++  "evidence": [
++    {
++      "text": "exact phrase from clause",
++      "signal": "which risk flag this supports"
++    }
++  ],
++  "signals": [
++    {
++      "flag": "risk flag name",
++      "reason": "why this was flagged",
++      "evidence_text": "exact text from clause"
++    }
++  ],
++  "related_clauses": [
++    {
++      "clause_id": "...",
++      "title": "...",
++      "type": "...",
++      "relationship": "how this relates to the target clause"
++    }
++  ],
++  "explanation": "plain English explanation of what this clause does and why it matters",
++  "consequence": "practical consequence for the user based on the clause and signals",
++  "review_points": [
++    "specific review point 1",
++    "specific review point 2"
++  ]
++}
++
++RULES:
++- All evidence_text must be exact quotes from the clause text
++- All signal flags must match the risk_flags from the target clause
++- Related clauses must be from the provided all_clauses list
++- Relationship must explain the connection (e.g., "Termination triggers IP assignment", "Confidentiality survives termination")
++- Explanation must be in plain English
++- Consequence must be practical and user-focused
++- Review points should be actionable
++- Do not invent facts not in the evidence
++"""
++
++INVESTIGATION_SCHEMA = {
++    "type": "json_schema",
++    "json_schema": {
++        "name": "InvestigationReport",
++        "strict": True,
++        "schema": {
++            "type": "object",
++            "properties": {
++                "finding": {
++                    "type": "object",
++                    "properties": {
++                        "clause_id": {"type": "string"},
++                        "title": {"type": "string"},
++                        "type": {"type": "string"},
++                        "risk_level": {"type": "string"},
++                        "risk_score": {"type": "integer"},
++                        "risk_flags": {"type": "array", "items": {"type": "string"}},
++                        "risk_reasons": {"type": "array", "items": {"type": "string"}}
++                    },
++                    "required": ["clause_id", "title", "type", "risk_level", "risk_score", "risk_flags", "risk_reasons"],
++                    "additionalProperties": False
++                },
++                "evidence": {
++                    "type": "array",
++                    "items": {
++                        "type": "object",
++                        "properties": {
++                            "text": {"type": "string"},
++                            "signal": {"type": "string"}
++                        },
++                        "required": ["text", "signal"],
++                        "additionalProperties": False
++                    }
++                },
++                "signals": {
++                    "type": "array",
++                    "items": {
++                        "type": "object",
++                        "properties": {
++                            "flag": {"type": "string"},
++                            "reason": {"type": "string"},
++                            "evidence_text": {"type": "string"}
++                        },
++                        "required": ["flag", "reason", "evidence_text"],
++                        "additionalProperties": False
++                    }
++                },
++                "related_clauses": {
++                    "type": "array",
++                    "items": {
++                        "type": "object",
++                        "properties": {
++                            "clause_id": {"type": "string"},
++                            "title": {"type": "string"},
++                            "type": {"type": "string"},
++                            "relationship": {"type": "string"}
++                        },
++                        "required": ["clause_id", "title", "type", "relationship"],
++                        "additionalProperties": False
++                    }
++                },
++                "explanation": {"type": "string"},
++                "consequence": {"type": "string"},
++                "review_points": {
++                    "type": "array",
++                    "items": {"type": "string"}
++                }
++            },
++            "required": ["finding", "evidence", "signals", "related_clauses", "explanation", "consequence", "review_points"],
++            "additionalProperties": False
++        }
++    }
++}
++
++
++def generate_investigation(
++    contract_data: dict,
++    target_clause: dict,
++    all_clauses: list
++) -> dict:
++    """
++    Generate a structured investigation of a specific contract clause.
++    
++    Args:
++        contract_data: Full contract data with clauses
++        target_clause: The specific clause to investigate
++        all_clauses: All clauses in the contract for cross-referencing
++    
++    Returns:
++        Structured investigation object for the UI investigation sequence
++    """
++    clause_text = str(target_clause.get("text", "")).strip()
++    clause_id = target_clause.get("clause_id")
++    clause_title = target_clause.get("title", "")
++    clause_type = target_clause.get("clause_type", "Other")
++    risk_level = target_clause.get("risk_level", "Unknown")
++    risk_score = target_clause.get("risk_score", 0)
++    risk_flags = target_clause.get("risk_flags", [])
++    risk_reasons = target_clause.get("risk_reasons", [])
++    
++    if not clause_text:
++        raise ValueError("The selected clause is empty.")
++    
++    # Build evidence from risk flags - map each flag to supporting text in the clause
++    evidence = []
++    signals = []
++    
++    # Map each risk flag to evidence in the clause text
++    for i, flag in enumerate(risk_flags):
++        reason = risk_reasons[i] if i < len(risk_reasons) else ""
++        
++        # Find relevant text in clause that supports this flag
++        evidence_text = _find_evidence_for_flag(clause_text, flag)
++        
++        evidence.append({
++            "text": evidence_text,
++            "signal": flag
++        })
++        
++        signals.append({
++            "flag": flag,
++            "reason": reason,
++            "evidence_text": evidence_text
++        })
++    
++    # Find related clauses
++    related_clauses = _find_related_clauses(target_clause, all_clauses)
++    
++    # Build the finding object
++    finding = {
++        "clause_id": str(clause_id),
++        "title": clause_title,
++        "type": clause_type,
++        "risk_level": risk_level,
++        "risk_score": risk_score,
++        "risk_flags": risk_flags,
++        "risk_reasons": risk_reasons
++    }
++    
++    # Generate explanation, consequence, and review points
++    explanation = _generate_explanation(target_clause, all_clauses)
++    consequence = _generate_consequence(target_clause, all_clauses)
++    review_points = _generate_review_points(target_clause, all_clauses)
++    
++    # Find related clauses
++    related_clauses = _find_related_clauses(target_clause, all_clauses)
++    
++    # Build evidence from risk flags
++    evidence = []
++    signals = []
++    for i, flag in enumerate(risk_flags):
++        reason = risk_reasons[i] if i < len(risk_reasons) else ""
++        evidence_text = _find_evidence_for_flag(clause_text, flag)
++        evidence.append({
++            "text": evidence_text,
++            "signal": flag
++        })
++        signals.append({
++            "flag": flag,
++            "reason": reason,
++            "evidence_text": evidence_text
++        })
++    
++    # Build related clauses
++    related_clauses = _find_related_clauses(target_clause, all_clauses)
++    
+     return {
+-        "answer": answer,
+-        "answer_type": answer_type,
+-        "grounded": grounded and len(validated_sources) > 0,
+-        "sources": validated_sources,
+-        "follow_up_suggestions": follow_up_suggestions
++        "finding": {
++            "clause_id": str(target_clause.get("clause_id")),
++            "title": target_clause.get("title", ""),
++            "type": target_clause.get("clause_type", "Other"),
++            "risk_level": target_clause.get("risk_level", "Unknown"),
++            "risk_score": target_clause.get("risk_score", 0),
++            "risk_flags": target_clause.get("risk_flags", []),
++            "risk_reasons": target_clause.get("risk_reasons", [])
++        },
++        "evidence": [
++            {"text": _find_evidence_for_flag(clause_text, flag), "signal": flag}
++            for flag in risk_flags
++        ],
++        "signals": [
++            {
++                "flag": flag,
++                "reason": risk_reasons[i] if i < len(risk_reasons) else "",
++                "evidence_text": _find_evidence_for_flag(clause_text, flag)
++            }
++            for i, flag in enumerate(risk_flags)
++        ],
++        "related_clauses": _find_related_clauses(target_clause, all_clauses),
++        "explanation": _generate_explanation(target_clause, all_clauses),
++        "consequence": _generate_consequence(target_clause, all_clauses),
++        "review_points": _generate_review_points(target_clause, all_clauses)
++    }
++
++
++def _find_evidence_for_flag(clause_text: str, flag: str) -> str:
++    """Find relevant text in clause that supports a risk flag."""
++    flag_lower = flag.lower()
++    text_lower = clause_text.lower()
++    
++    # Map flags to search patterns
++    flag_patterns = {
++        "termination without meaningful notice": ["without notice", "without prior notice", "immediately"],
++        "broad termination right": ["at any time", "for any reason", "for no reason", "without cause", "sole discretion"],
++        "potentially one-sided termination": ["either party", "one party"],
++        "broad indemnification scope": ["any and all claims", "any and all", "all claims", "any claims"],
++        "defense and indemnity obligation": ["indemnify, defend, and hold harmless", "indemnify and hold harmless", "hold harmless"],
++        "potentially uncapped liability": ["unlimited", "not subject to any monetary cap", "without limitation", "no monetary cap"],
++        "legal-fee exposure": ["attorneys' fees", "attorney's fees", "legal fees"],
++        "automatic renewal": ["automatically renew", "automatic renewal", "successive", "renewal term"],
++        "extended non-renewal notice": ["90 days", "ninety days", "60 days", "sixty days", "120 days", "one hundred twenty days"],
++        "continuing fee obligation": ["remaining fees", "fees through the end", "full remaining term"],
++        "potentially unlimited liability": ["unlimited liability", "unlimited", "not subject to any monetary cap", "no monetary cap"],
++        "liability allocation provision": ["aggregate liability", "liability shall not exceed", "maximum liability"],
++        "broad intellectual-property assignment": ["assigns all right, title and interest", "all right, title and interest", "hereby assigns", "irrevocably assigns"],
++        "broad rights over pre-existing materials": ["pre-existing", "background intellectual property", "prior inventions"],
++        "long-lasting confidentiality obligation": ["perpetual", "at all times", "survive termination", "indefinitely"],
++        "broad confidential-information scope": ["trade secrets", "all confidential information", "non-public information"],
++        "non-compete restriction": ["non-compete", "non compete", "noncompetition", "competing business"],
++        "time-limited post-termination restriction": ["five years", "3 years", "three years", "two years", "one year", "months"],
++        "extended payment period": ["net 60", "net sixty", "net 90", "ninety days", "60 days"],
++        "one-sided payment discretion": ["sole discretion", "may withhold", "may deduct"],
++        "mandatory dispute-resolution mechanism": ["binding arbitration", "mandatory arbitration", "waive a trial by jury", "waive trial by jury"],
++    }
++    
++    # Find matching evidence text
++    patterns = flag_patterns.get(flag.lower(), [])
++    for pattern in patterns:
++        if pattern in clause_text.lower():
++            # Find the sentence containing this pattern
++            sentences = re.split(r'(?<=[.!?])\s+', clause_text)
++            for sent in sentences:
++                if pattern in sent.lower():
++                    return sent.strip()
++    
++    # Fallback: return first 200 chars of clause
++    return clause_text[:200] + ("..." if len(clause_text) > 200 else "")
++
++
++def _find_related_clauses(target_clause: dict, all_clauses: list) -> list:
++    """Find clauses related to the target clause."""
++    target_type = target_clause.get("clause_type", "")
++    target_id = target_clause.get("clause_id")
++    
++    # Define relationships between clause types
++    relationships = {
++        "Termination": ["Intellectual Property", "Confidentiality", "Payment", "Indemnification"],
++        "Intellectual Property": ["Termination", "Confidentiality", "Payment"],
++        "Payment": ["Termination", "Intellectual Property", "Indemnification"],
++        "Indemnification": ["Termination", "Limitation of Liability", "Payment"],
++        "Confidentiality": ["Termination", "Intellectual Property", "Restrictive Covenant"],
++        "Restrictive Covenant": ["Termination", "Confidentiality", "Payment"],
++        "Limitation of Liability": ["Indemnification", "Termination"],
++        "Non-Compete": ["Termination", "Confidentiality"],
++    }
++    
++    related_types = relationships.get(target_clause.get("clause_type", ""), [])
++    related = []
++    
++    for clause in all_clauses:
++        if clause.get("clause_id") == target_clause.get("clause_id"):
++            continue
++        if clause.get("clause_type") in related_types:
++            relationship = _describe_relationship(target_clause.get("clause_type"), clause.get("clause_type"))
++            related.append({
++                "clause_id": str(clause.get("clause_id")),
++                "title": clause.get("title", ""),
++                "type": clause.get("clause_type"),
++                "relationship": relationship
++            })
++    
++    return related[:3]  # Limit to top 3 related clauses
++
++
++def _describe_relationship(type1: str, type2: str) -> str:
++    """Describe the relationship between two clause types."""
++    relationships = {
++        ("Termination", "Intellectual Property"): "Termination triggers IP ownership transfer",
++        ("Intellectual Property", "Termination"): "IP ownership survives termination",
++        ("Termination", "Confidentiality"): "Termination does not end confidentiality obligations",
++        ("Confidentiality", "Termination"): "Confidentiality survives termination",
++        ("Termination", "Payment"): "Termination triggers final payment obligation",
++        ("Payment", "Termination"): "Payment terms survive termination for work completed",
++        ("Termination", "Indemnification"): "Termination may trigger indemnification obligations",
++        ("Indemnification", "Termination"): "Indemnification survives termination",
++        ("Termination", "Payment"): "Termination triggers final payment",
++        ("Confidentiality", "Termination"): "Confidentiality survives termination",
++        ("Restrictive Covenant", "Termination"): "Restrictions activate on termination",
++        ("Termination", "Restrictive Covenant"): "Termination activates non-compete restrictions",
++    }
++    
++    key = (type1, type2)
++    return relationships.get(key, f"Related to {type2.lower()}")
++
++
++def _generate_explanation(target_clause: dict, all_clauses: list) -> str:
++    """Generate plain English explanation of the clause."""
++    clause_type = target_clause.get("clause_type", "")
++    clause_text = target_clause.get("text", "")
++    clause_title = target_clause.get("title", "")
++    
++    explanations = {
++        "Termination": f"This {target_clause.get('title', 'clause').lower()} clause defines how and when the agreement can be ended. It specifies who can terminate, what notice is required, and what happens when the agreement ends.",
++        "Intellectual Property": f"This {target_clause.get('title', 'clause').lower()} clause determines who owns the work product and intellectual property created under the agreement. It typically assigns ownership to one party.",
++        "Confidentiality": f"This {target_clause.get('title', 'clause').lower()} clause requires the parties to protect confidential information. It defines what counts as confidential and how long the obligation lasts.",
++        "Indemnification": f"This {target_clause.get('title', 'clause').lower()} clause requires one party to protect the other from legal claims and costs arising from their work under the agreement.",
++        "Payment": f"This {target_clause.get('title', 'clause').lower()} clause defines the payment terms, amounts, schedule, and conditions for payment under the agreement.",
++        "Confidentiality": f"This {target_clause.get('title', 'clause').lower()} clause requires the parties to protect confidential information and not disclose it to third parties.",
++        "Restrictive Covenant": f"This {target_clause.get('title', 'clause').lower()} clause restricts a party from competing with the other party or soliciting their employees/customers for a specified period after the agreement ends.",
++        "Limitation of Liability": f"This {clause_type.lower()} clause limits the financial liability of one or both parties under the agreement.",
++        "Indemnification": f"This {target_clause.get('title', 'clause').lower()} clause requires one party to defend and compensate the other for claims arising from their work.",
++        "Auto-Renewal": f"This {target_clause.get('title', 'clause').lower()} clause causes the agreement to automatically renew unless a party gives notice to terminate.",
++        "Dispute Resolution": f"This {target_clause.get('title', 'clause').lower()} clause specifies how disputes will be resolved, such as through arbitration or litigation.",
++        "Governing Law": f"This {target_clause.get('title', 'clause').lower()} clause specifies which jurisdiction's laws govern the agreement.",
++        "Assignment": f"This {target_clause.get('title', 'clause').lower()} clause controls whether the agreement can be transferred to another party.",
++        "Warranties": f"This {target_clause.get('title', 'clause').lower()} clause sets out the promises and guarantees each party makes about their performance.",
++        "Force Majeure": f"This {target_clause.get('title', 'clause').lower()} clause excuses performance when extraordinary events beyond the parties' control occur.",
++        "Assignment": f"This {target_clause.get('title', 'clause').lower()} clause controls whether the agreement can be transferred to another party.",
++        "Warranties": f"This {target_clause.get('title', 'clause').lower()} clause sets out the promises and guarantees each party makes about their performance.",
++        "Force Majeure": f"This {target_clause.get('title', 'clause').lower()} clause excuses performance when extraordinary events beyond the parties' control occur."
++    }
++    
++    clause_type_key = target_clause.get("clause_type", "")
++    if clause_type_key in explanations:
++        return explanations[clause_type_key]
++    
++    return f"This {target_clause.get('title', 'clause').lower()} clause is a {target_clause.get('clause_type', 'contract').lower()} provision that defines rights and obligations under the agreement."
++
++
++def _generate_consequence(target_clause: dict, all_clauses: list) -> str:
++    """Generate practical consequence for the user."""
++    clause_type = target_clause.get("clause_type", "")
++    risk_flags = target_clause.get("risk_flags", [])
++    
++    consequences = {
++        "Termination": "You or the other party can end the agreement with the required notice. Make sure you understand the notice period and what happens to your work and payments when the agreement ends.",
++        "Intellectual Property": "You may be giving up ownership of all work you create under this agreement. Consider whether you need to carve out pre-existing IP or limit the assignment.",
++        "Confidentiality": "You must protect the other party's confidential information. This obligation may continue long after the contract ends. Understand what counts as confidential and how long the obligation lasts.",
++        "Indemnification": "You may be responsible for the other party's legal costs and damages if claims arise from your work. Check if there are caps or carve-outs that limit your exposure.",
++        "Payment": "Understand when and how you get paid. Check for late payment terms, invoicing requirements, and whether payments can be withheld.",
++        "Confidentiality": "You must protect confidential information and not share it. This obligation may continue long after the contract ends.",
++        "Restrictive Covenant": "You may be restricted from working with competitors or soliciting clients/employees after the contract ends. Check the geographic scope, duration, and whether it applies regardless of how the contract ends.",
++        "Limitation of Liability": "Your financial exposure may be capped, or you may be exposed to unlimited liability. Check if there's a meaningful cap and what types of damages are excluded.",
++        "Indemnification": "You may be responsible for covering the other party's legal costs if claims arise from your work. Check for caps, carve-outs, and whether you have to defend them.",
++        "Auto-Renewal": "The contract may renew automatically unless you give notice by a specific deadline. Calendar the deadline now.",
++        "Dispute Resolution": "Disputes may go to arbitration instead of court. This can be faster but limits appeal rights.",
++        "Governing Law": "The contract will be interpreted under the specified jurisdiction's laws. This affects how terms are interpreted.",
++        "Assignment": "You may not be able to transfer your rights/obligations without consent. This matters if your company is acquired or restructured.",
++        "Warranties": "You're making promises about your performance. Breach could trigger indemnification or termination.",
++        "Force Majeure": "Neither party is liable for failures caused by extraordinary events beyond their control.",
++        "Assignment": "You may not be able to transfer your rights/obligations without consent.",
++        "Warranties": "You're making promises about your performance. Breach could trigger indemnification or termination.",
++        "Force Majeure": "Neither party is liable for failures caused by extraordinary events beyond their control."
++    }
++    
++    clause_type = target_clause.get("clause_type", "")
++    if clause_type in consequences:
++        return consequences[clause_type]
++    
++    return "Review this clause carefully to understand your rights and obligations. Consider consulting legal counsel for advice specific to your situation."
++
++
++def _generate_review_points(target_clause: dict, all_clauses: list) -> list:
++    """Generate actionable review points for the clause."""
++    clause_type = target_clause.get("clause_type", "")
++    risk_flags = target_clause.get("risk_flags", [])
++    clause_text = target_clause.get("text", "")
++    
++    points = []
++    
++    # Type-specific review points
++    if "Termination" in target_clause.get("clause_type", ""):
++        if "Termination without meaningful notice" in risk_flags:
++            points.append("Check if the notice period is sufficient for your business needs")
++        if "Broad termination right" in risk_flags:
++            points.append("Consider whether either party should be able to terminate without cause")
++        if "Potentially one-sided termination" in risk_flags:
++            points.append("Verify termination rights are mutual or negotiate mutual termination rights")
++        points.append("Confirm what happens to payments and deliverables upon termination")
++        points.append("Check if termination for cause has a cure period")
++    
++    elif "Intellectual Property" in target_clause.get("clause_type", ""):
++        if "Broad intellectual-property assignment" in risk_flags:
++            points.append("Identify any pre-existing IP you want to exclude from assignment")
++        points.append("Clarify ownership of improvements and derivative works")
++        points.append("Check if you retain a license to use your own work")
++    
++    elif "Confidentiality" in target_clause.get("clause_type", ""):
++        if "Long-lasting confidentiality obligation" in risk_flags:
++            points.append("Check if the confidentiality period is reasonable for your industry")
++        if "Broad confidential-information scope" in risk_flags:
++            points.append("Narrow the definition of confidential information to what's truly sensitive")
++        points.append("Confirm what happens to confidential info upon contract termination")
++    
++    elif "Indemnification" in target_clause.get("clause_type", ""):
++        if "Broad indemnification scope" in risk_flags:
++            points.append("Negotiate a cap on indemnification liability")
++        if "Defense and indemnity obligation" in risk_flags:
++            points.append("Clarify who controls the defense of claims")
++        points.append("Check if there's a cap on indemnification liability")
++        points.append("Confirm carve-outs for willful misconduct vs. negligence")
++    
++    elif "Restrictive Covenant" in target_clause.get("clause_type", ""):
++        if "Non-compete restriction" in risk_flags:
++            points.append("Check if the geographic scope is reasonable for your business")
++        if "Time-limited post-termination restriction" in risk_flags:
++            points.append("Negotiate a shorter restriction period if possible")
++        points.append("Check if restrictions apply regardless of termination reason")
++        points.append("Confirm the definition of 'competing business' is narrow")
++    
++    elif "Indemnification" in target_clause.get("clause_type", ""):
++        if "Broad indemnification scope" in risk_flags:
++            points.append("Negotiate a cap on indemnification liability")
++        if "Defense and indemnity obligation" in risk_flags:
++            points.append("Clarify who controls the defense of claims")
++        points.append("Check if there's a cap on indemnification liability")
++        points.append("Confirm carve-outs for willful misconduct vs. negligence")
++    
++    # Generic fallback
++    if not points:
++        points = [
++            "Review this clause carefully for obligations and restrictions",
++            "Consider how this clause interacts with other provisions in the agreement",
++            "Consult legal counsel if the implications are unclear"
++        ]
++    
++    return points[:4]  # Limit to 4 review points
++
++
++def generate_contract_investigation(
++    contract_data: dict,
++    all_clauses: list
++) -> dict:
++    """
++    Generate a contract-level investigation for the entire contract.
++    
++    This creates a structured investigation that starts from the whole contract
++    and progressively focuses on the highest-risk finding.
++    
++    Args:
++        contract_data: Full contract data with clauses, summary, filename
++        all_clauses: All clauses in the contract
++        
++    Returns:
++        Structured investigation object for the scroll-driven UI
++    """
++    clauses = all_clauses
++    summary = contract_data.get("summary", {})
++    filename = contract_data.get("filename", "Uploaded Agreement")
++    contract_id = contract_data.get("contract_id")
++    
++    # Collect all findings (clauses with risk flags)
++    findings = []
++    for clause in clauses:
++        risk_flags = clause.get("risk_flags", [])
++        risk_reasons = clause.get("risk_reasons", [])
++        risk_level = clause.get("risk_level", "LOW")
++        risk_score = clause.get("risk_score", 0)
++        
++        if risk_flags or risk_level in ("HIGH", "MEDIUM"):
++            findings.append({
++                "clause_id": str(clause.get("clause_id")),
++                "title": clause.get("title", clause.get("clause_type", "Clause")),
++                "type": clause.get("clause_type", "Other"),
++                "risk_level": risk_level,
++                "risk_score": risk_score,
++                "risk_flags": risk_flags,
++                "risk_reasons": risk_reasons,
++                "clause_text": clause.get("text", "")
++            })
++    
++    # Sort findings by risk score (highest first)
++    findings.sort(key=lambda f: f.get("risk_score", 0), reverse=True)
++    
++    # Pick focus finding (highest risk)
++    focus_finding = findings[0] if findings else {}
++    
++    # Build evidence for focus finding
++    focus_clause = None
++    for clause in clauses:
++        if str(clause.get("clause_id")) == focus_finding.get("clause_id"):
++            focus_clause = clause
++            break
++    
++    if not focus_clause and clauses:
++        focus_clause = clauses[0]
++    
++    focus_text = focus_clause.get("text", "") if focus_clause else ""
++    focus_flags = focus_finding.get("risk_flags", [])
++    focus_reasons = focus_finding.get("risk_reasons", [])
++    
++    # Build evidence array
++    evidence = []
++    signals = []
++    for i, flag in enumerate(focus_flags):
++        reason = focus_reasons[i] if i < len(focus_reasons) else ""
++        evidence_text = _find_evidence_for_flag(focus_text, flag)
++        evidence.append({
++            "text": evidence_text,
++            "signal": flag
++        })
++        signals.append({
++            "flag": flag,
++            "reason": reason,
++            "evidence_text": evidence_text
++        })
++    
++    # Find related clauses for focus finding
++    related_clauses = _find_related_clauses(focus_finding, all_clauses)
++    
++    # Generate explanation, consequence, review points
++    explanation = _generate_explanation(focus_finding, all_clauses)
++    consequence = _generate_consequence(focus_finding, all_clauses)
++    review_points = _generate_review_points(focus_finding, all_clauses)
++    
++    # Contract title
++    contract_title = filename.replace(".pdf", "").replace(".docx", "").replace("_", " ").title()
++    
++    # Stats
++    high_count = summary.get("high_risk_count", sum(1 for c in clauses if c.get("risk_level") == "HIGH"))
++    medium_count = summary.get("medium_risk_count", sum(1 for c in clauses if c.get("risk_level") == "MEDIUM"))
++    low_count = summary.get("low_risk_count", sum(1 for c in clauses if c.get("risk_level") == "LOW"))
++    
++    return {
++        "contract": {
++            "title": contract_title,
++            "filename": filename,
++            "contract_id": contract_id,
++            "clause_count": len(clauses),
++            "finding_count": len(findings),
++            "risk_distribution": {
++                "high": high_count,
++                "medium": medium_count,
++                "low": low_count
++            }
++        },
++        "findings": findings,
++        "focus_finding": focus_finding,
++        "evidence": evidence,
++        "signals": signals,
++        "related_clauses": related_clauses,
++        "explanation": explanation,
++        "consequence": consequence,
++        "review_points": review_points,
++        "stats": {
++            "signals": len(signals),
++            "related": len(related_clauses),
++            "review": len(review_points)
++        }
+     }
+\ No newline at end of file
+diff --git a/backend/main.py b/backend/main.py
+index 1abf666..8f8ad8c 100644
+--- a/backend/main.py
++++ b/backend/main.py
+@@ -1,7 +1,7 @@
+ # ============================================================
+ # MAIN FASTAPI APPLICATION
+ # ============================================================
+-from app.ai_service import generate_clause_insight, generate_contract_chat
++from app.ai_service import generate_clause_insight, generate_contract_chat, generate_investigation, generate_contract_investigation
+ from pathlib import Path
+ import re
+ import shutil
+@@ -508,7 +508,8 @@ def root(
+ 
+ 
+     return FileResponse(
+-        INDEX_PAGE
++        INDEX_PAGE,
++        media_type="text/html"
+     )
+ 
+ 
+@@ -1048,9 +1049,169 @@ def contract_chat(
+ 
+ 
+ # ============================================================
+-# CONTRACT MANAGEMENT ENDPOINTS
++# AI INVESTIGATION
+ # ============================================================
+ 
++class InvestigationRequest(BaseModel):
++    contract_id: int
++    clause_id: int
++
++
++class ContractInvestigationRequest(BaseModel):
++    contract_id: int
++
++
++@app.post("/api/ai/investigation")
++def investigation(
++    payload: InvestigationRequest,
++    user=Depends(require_user)
++):
++    """
++    AI Investigation - structured investigation of a specific contract clause.
++    
++    Returns a structured investigation object with:
++    - The selected clause
++    - Evidence (supporting text)
++    - Detected signals
++    - Related clauses
++    - Explanation
++    - Practical consequence
++    - Review points
++    """
++    user_id = int(user["id"])
++    contract_id = payload.contract_id
++    clause_id = payload.clause_id
++    
++    # Verify contract belongs to user
++    contract_row = get_contract(contract_id, user_id)
++    if contract_row is None:
++        raise HTTPException(
++            status_code=404,
++            detail="Contract not found."
++        )
++    
++    # Parse contract data
++    import json
++    try:
++        clauses = json.loads(contract_row["clauses_json"])
++    except Exception as exc:
++        print(f"[INVESTIGATION] Failed to parse contract data: {exc}")
++        raise HTTPException(
++            status_code=500,
++            detail="Failed to load contract data."
++        )
++    
++    # Find the target clause
++    target_clause = None
++    for clause in json.loads(contract_row["clauses_json"]):
++        if clause.get("clause_id") == clause_id:
++            target_clause = clause
++            break
++    
++    if target_clause is None:
++        raise HTTPException(
++            status_code=404,
++            detail="Clause not found in contract."
++        )
++    
++    # Build investigation object
++    try:
++        investigation = generate_investigation(
++            contract_data={"clauses": json.loads(contract_row["clauses_json"])},
++            target_clause=target_clause,
++            all_clauses=json.loads(contract_row["clauses_json"])
++        )
++        
++        return {
++            "success": True,
++            "investigation": investigation
++        }
++        
++    except RuntimeError as error:
++        raise HTTPException(
++            status_code=503,
++            detail=str(error)
++        )
++    except Exception as error:
++        print(f"[INVESTIGATION] Error: {error}")
++        raise HTTPException(
++            status_code=500,
++            detail="Investigation failed."
++        )
++
++
++@app.post("/api/ai/investigation/contract")
++def investigation_contract_level(
++    payload: ContractInvestigationRequest,
++    user=Depends(require_user)
++):
++    """
++    AI Investigation - contract-level investigation.
++    
++    Returns a structured investigation object for the entire contract:
++    - Contract overview
++    - All findings across the contract
++    - Focus finding (highest risk)
++    - Evidence for focus finding
++    - Signals for focus finding
++    - Related clauses for focus finding
++    - Explanation
++    - Practical consequence
++    - Review points
++    - Summary stats
++    """
++    user_id = int(user["id"])
++    contract_id = payload.contract_id
++    
++    # Verify contract belongs to user
++    contract_row = get_contract(contract_id, user_id)
++    if contract_row is None:
++        raise HTTPException(
++            status_code=404,
++            detail="Contract not found."
++        )
++    
++    # Parse contract data
++    import json
++    try:
++        clauses = json.loads(contract_row["clauses_json"])
++        summary = json.loads(contract_row["summary_json"]) if contract_row["summary_json"] else {}
++    except Exception as exc:
++        print(f"[CONTRACT INVESTIGATION] Failed to parse contract data: {exc}")
++        raise HTTPException(
++            status_code=500,
++            detail="Failed to load contract data."
++        )
++    
++    # Build contract-level investigation
++    try:
++        investigation = generate_contract_investigation(
++            contract_data={
++                "clauses": clauses,
++                "summary": summary,
++                "filename": contract_row["filename"],
++                "contract_id": contract_id
++            },
++            all_clauses=clauses
++        )
++        
++        return {
++            "success": True,
++            "investigation": investigation
++        }
++        
++    except RuntimeError as error:
++        raise HTTPException(
++            status_code=503,
++            detail=str(error)
++        )
++    except Exception as error:
++        print(f"[CONTRACT INVESTIGATION] Error: {error}")
++        raise HTTPException(
++            status_code=500,
++            detail="Contract investigation failed."
++        )
++
+ @app.get("/api/contracts")
+ def list_contracts(
+     user=Depends(require_user)
+diff --git a/frontend/static/app.js b/frontend/static/app.js
+index 608791a..352519b 100644
+--- a/frontend/static/app.js
++++ b/frontend/static/app.js
+@@ -673,35 +673,7 @@ function calculateSummary(
+    VIEW MANAGEMENT
+ ============================================================ */
+ 
+-function showView(view) {
+-    const viewIds = [
+-        "uploadView",
+-        "processingView",
+-        "overviewView",
+-        "groupView",
+-        "askContractView"
+-    ];
+-
+-    viewIds.forEach((viewId) => {
+-        const element = document.getElementById(viewId);
+ 
+-        if (element) {
+-            element.classList.add("hidden");
+-        }
+-    });
+-
+-    const targetView =
+-        typeof view === "string"
+-            ? document.getElementById(view)
+-            : view;
+-
+-    if (!targetView) {
+-        console.error("showView: target view not found:", view);
+-        return;
+-    }
+-
+-    targetView.classList.remove("hidden");
+-}
+ 
+ 
+ function setBreadcrumb(
+@@ -1261,6 +1233,7 @@ function renderOverview(
+     setBreadcrumb(
+         "Overview"
+     );
++    setNavActive("overviewNav");
+ 
+ 
+     window.scrollTo(
+@@ -1359,7 +1332,7 @@ function renderPriorityFindings() {
+                         ).toUpperCase();
+ 
+ 
+-                    return `
++return `
+ 
+                         <button
+                             class="priority-card"
+@@ -1388,14 +1361,14 @@ function renderPriorityFindings() {
+                                     )}
+ 
+                                     ·
+-
++ 
+                                     ${escapeHtml(
+                                         clause.clause_type ||
+                                         "Other"
+                                     )}
+ 
+                                     ·
+-
++ 
+                                     ${escapeHtml(
+                                         level
+                                     )}
+@@ -1423,6 +1396,16 @@ function renderPriorityFindings() {
+ 
+                         </button>
+ 
++                        <button
++                            class="priority-investigate-btn"
++                            type="button"
++                            data-clause-id="${escapeHtml(clause.clause_id)}"
++                            data-action="investigate"
++                            aria-label="Investigate this clause with AI"
++                        >
++                            Investigate
++                        </button>
++
+                     `;
+ 
+                 }
+@@ -1441,7 +1424,7 @@ function renderPriorityFindings() {
+ 
+                 button.addEventListener(
+                     "click",
+-                    () => {
++                    (event) => {
+ 
+                         const id =
+                             String(
+@@ -1449,6 +1432,8 @@ function renderPriorityFindings() {
+                                     .clauseId
+                             );
+ 
++                        const isInvestigate = button.dataset.action === "investigate";
++
+ 
+                         const clause =
+                             currentClauses.find(
+@@ -1468,6 +1453,13 @@ function renderPriorityFindings() {
+                         }
+ 
+ 
++                        if (isInvestigate) {
++                            event.stopPropagation();
++                            openInvestigationView(clause);
++                            return;
++                        }
++
++
+                         activeRisk =
+                             String(
+                                 clause.risk_level ||
+@@ -1751,68 +1743,82 @@ function renderClauseCards(
+ 
+                     return `
+ 
+-                        <button
+-                            class="
+-                                clause-card
+-                                ${active}
+-                            "
+-                            type="button"
+-                            data-clause-id="${escapeHtml(
+-                                clause.clause_id
+-                            )}"
+-                        >
++                        <div class="clause-card-wrapper">
+ 
+-                            <div class="clause-top">
++                            <button
++                                class="
++                                    clause-card
++                                    ${active}
++                                "
++                                type="button"
++                                data-clause-id="${escapeHtml(
++                                    clause.clause_id
++                                )}"
++                            >
+ 
+-                                <span class="clause-id">
++                                <div class="clause-top">
+ 
+-                                    CLAUSE
+-                                    ${escapeHtml(
+-                                        clause.clause_id
+-                                    )}
++                                    <span class="clause-id">
++
++                                        CLAUSE
++                                        ${escapeHtml(
++                                            clause.clause_id
++                                        )}
+ 
+-                                </span>
++                                    </span>
+ 
+ 
+-                                <span
+-                                    class="
+-                                        clause-risk
+-                                        priority-${riskClass(
++                                    <span
++                                        class="
++                                            clause-risk
++                                            priority-${riskClass(
++                                                level
++                                            )}
++                                        "
++                                    >
++
++                                        ${escapeHtml(
+                                             level
+                                         )}
+-                                    "
+-                                >
+ 
+-                                    ${escapeHtml(
+-                                        level
+-                                    )}
++                                    </span>
+ 
+-                                </span>
++                                </div>
+ 
+-                            </div>
+ 
++                                <h3>
+ 
+-                            <h3>
++                                    ${escapeHtml(
++                                        clauseTitle(
++                                            clause
++                                        )
++                                    )}
+ 
+-                                ${escapeHtml(
+-                                    clauseTitle(
+-                                        clause
+-                                    )
+-                                )}
++                                </h3>
+ 
+-                            </h3>
+ 
++                                <div class="clause-preview">
+ 
+-                            <div class="clause-preview">
++                                    ${escapeHtml(
++                                        preview ||
++                                        "No clause text returned."
++                                    )}
+ 
+-                                ${escapeHtml(
+-                                    preview ||
+-                                    "No clause text returned."
+-                                )}
++                                </div>
+ 
+-                            </div>
++                            </button>
+ 
+-                        </button>
++                            <button
++                                class="clause-investigate-btn"
++                                type="button"
++                                data-clause-id="${escapeHtml(clause.clause_id)}"
++                                data-action="investigate"
++                                aria-label="Investigate this clause with AI"
++                            >
++                                Investigate
++                            </button>
++
++                        </div>
+ 
+                     `;
+ 
+@@ -1832,11 +1838,12 @@ function renderClauseCards(
+ 
+                 button.addEventListener(
+                     "click",
+-                    () => {
++                    (event) => {
+ 
+-                        activeClauseId =
+-                            button.dataset
+-                                .clauseId;
++                        const id =
++                            String(button.dataset.clauseId);
++
++                        const isInvestigate = button.dataset.action === "investigate";
+ 
+ 
+                         const clause =
+@@ -1846,13 +1853,27 @@ function renderClauseCards(
+                                 ) =>
+                                     String(
+                                         item.clause_id
+-                                    ) ===
+-                                    String(
+-                                        activeClauseId
+-                                    )
++                                    ) === id
+                             );
+ 
+ 
++                        if (!clause) {
++
++                            return;
++
++                        }
++
++
++                        if (isInvestigate) {
++                            event.stopPropagation();
++                            openInvestigationView(clause);
++                            return;
++                        }
++
++
++                        activeClauseId = id;
++
++
+                         renderClauseCards(
+                             clauses
+                         );
+@@ -2143,6 +2164,39 @@ function renderDetail(
+ 
+         </div>
+ 
++        <!-- ==================================================
++             AI INVESTIGATION
++        =================================================== -->
++
++        <div class="ai-placeholder investigation-trigger">
++
++            <div class="ai-label">
++                AI INVESTIGATION
++            </div>
++
++
++            <p>
++                Launch a structured, scroll-driven investigation
++                of this clause with evidence, signals, and consequences.
++            </p>
++
++
++            <button
++                type="button"
++                class="ai-analyze-btn investigation-btn"
++                id="investigateClauseButton"
++            >
++
++                Investigate Clause
++
++                <span>
++                    →
++                </span>
++
++            </button>
++
++        </div>
++
+     `;
+ 
+ 
+@@ -2167,6 +2221,14 @@ function renderDetail(
+ 
+     }
+ 
++    const investigateButton = document.getElementById("investigateClauseButton");
++
++    if (investigateButton) {
++        investigateButton.addEventListener("click", () => {
++            openInvestigationView(clause);
++        });
++    }
++
+ }
+ 
+ 
+@@ -3212,6 +3274,27 @@ function bindEvents() {
+     }
+ 
+ 
++    /* --------------------------------------------------------
++       AI INVESTIGATION NAV
++   --------------------------------------------------------- */
++
++    const investigationNav =
++        document.getElementById(
++            "investigationNav"
++        );
++
++    if (
++        investigationNav
++    ) {
++
++        investigationNav.addEventListener(
++            "click",
++            openInvestigationView
++        );
++
++    }
++
++
+     /* --------------------------------------------------------
+        CHAT SEND
+    --------------------------------------------------------- */
+@@ -3672,6 +3755,688 @@ function autoResizeTextarea(textarea) {
+ }
+ 
+ 
++/* ============================================================
++   AI INVESTIGATION — SCROLL-DRIVEN CONTROLLER
++========================================================== */
++
++// Investigation state
++let investigationData = null;
++let investigationTimeline = null;
++let investigationScrollTriggers = [];
++let currentStepIndex = 0;
++let prefersReducedMotion = false;
++let investigationContractId = null;
++
++// DOM references
++const invEls = {};
++
++function initInvestigationElements() {
++    invEls.view = document.getElementById("investigationView");
++    invEls.canvas = document.getElementById("invCanvas");
++    invEls.svg = document.getElementById("invSvg");
++    invEls.closeBtn = document.getElementById("invCloseBtn");
++    invEls.contractTitle = document.getElementById("invContractTitle");
++    invEls.progressMarker = document.getElementById("invProgressMarker");
++    invEls.progressSteps = document.querySelectorAll("#invProgress .inv-progress-steps li");
++    invEls.emptyState = document.getElementById("invEmpty");
++    invEls.emptyAnalyzeBtn = document.getElementById("invEmptyAnalyzeBtn");
++    
++    // SVG groups
++    invEls.contractGroup = document.getElementById("invContractGroup");
++    invEls.contractBase = document.getElementById("invContractBase");
++    invEls.contractTitleText = document.getElementById("invContractTitleText");
++    invEls.contractSubtitleText = document.getElementById("invContractSubtitleText");
++    invEls.contractLines = document.getElementById("invContractLines");
++    invEls.findingsGroup = document.getElementById("invFindingsGroup");
++    invEls.focusGroup = document.getElementById("invFocusGroup");
++    invEls.focusBase = document.getElementById("invFocusBase");
++    invEls.focusTitle = document.getElementById("invFocusTitle");
++    invEls.focusRisk = document.getElementById("invFocusRisk");
++    invEls.focusScore = document.getElementById("invFocusScore");
++    invEls.focusFlags = document.getElementById("invFocusFlags");
++    invEls.evidenceGroup = document.getElementById("invEvidenceGroup");
++    invEls.evidenceFO = document.getElementById("invEvidenceFO");
++    invEls.evidencePanel = document.getElementById("invEvidencePanel");
++    invEls.connectorPath = document.getElementById("invConnectorPath");
++    invEls.signalGroup = document.getElementById("invSignalGroup");
++    invEls.signalCenter = document.getElementById("invSignalCenter");
++    invEls.signalLabel = document.getElementById("invSignalLabel");
++    invEls.signalSub = document.getElementById("invSignalSub");
++    invEls.signalOrbits = document.getElementById("invSignalOrbits");
++    invEls.signalNodes = document.getElementById("invSignalNodes");
++    invEls.whyGroup = document.getElementById("invWhyGroup");
++    invEls.whyFO = document.getElementById("invWhyFO");
++    invEls.whyPanel = document.getElementById("invWhyPanel");
++    invEls.relatedGroup = document.getElementById("invRelatedGroup");
++    invEls.relatedCenterNode = document.getElementById("invRelatedCenterNode");
++    invEls.relatedCenterLabel = document.getElementById("invRelatedCenterLabel");
++    invEls.relatedCenterTitle = document.getElementById("invRelatedCenterTitle");
++    invEls.relatedOrbits = document.getElementById("invRelatedOrbits");
++    invEls.relatedNodes = document.getElementById("invRelatedNodes");
++    invEls.relatedConnectors = document.getElementById("invRelatedConnectors");
++    invEls.consequenceGroup = document.getElementById("invConsequenceGroup");
++    invEls.consequenceFO = document.getElementById("invConsequenceFO");
++    invEls.consequencePanel = document.getElementById("invConsequencePanel");
++    invEls.completeGroup = document.getElementById("invCompleteGroup");
++    invEls.completeBadge = document.getElementById("invCompleteBadge");
++    invEls.completeStats = document.getElementById("invCompleteStats");
++    invEls.reviewFO = document.getElementById("invReviewFO");
++    invEls.reviewPanel = document.getElementById("invReviewPanel");
++    invEls.replayBtnGroup = document.getElementById("invReplayBtnGroup");
++    invEls.timelineDot = document.getElementById("invTimelineDot");
++}
++
++function checkReducedMotion() {
++    prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").match;
++}
++
++async function openInvestigationView() {
++    if (!currentData || !currentData.contract_id) {
++        // Show empty state - the new investigation module handles this
++        showView("investigationView");
++        setBreadcrumb("AI Investigation");
++        setNavActive("investigationNav");
++        window.scrollTo({ top: 0, behavior: "smooth" });
++        // Initialize the new investigation module
++        if (window.ClauseGuardInvestigation) {
++            window.ClauseGuardInvestigation.init();
++        }
++        return;
++    }
++
++    showView("investigationView");
++    setBreadcrumb("AI Investigation");
++    setNavActive("investigationNav");
++    window.scrollTo({ top: 0, behavior: "smooth" });
++
++    // Initialize the new investigation module (uses mock data for now)
++    if (window.ClauseGuardInvestigation) {
++        window.ClauseGuardInvestigation.init();
++    }
++}
++
++function closeInvestigationView() {
++    // Clean up investigation module
++    if (window.ClauseGuardInvestigation) {
++        window.ClauseGuardInvestigation.destroy();
++    }
++    
++    // Return to overview
++    if (currentData) {
++        renderOverview(currentData);
++    } else {
++        openUploadView();
++    }
++}
++
++function renderInvestigation() {
++    if (!investigationData) return;
++    
++    const inv = investigationData;
++    const contract = inv.contract || {};
++    const findings = inv.findings || [];
++    const focusFinding = inv.focus_finding || (findings[0] || {});
++    const evidence = inv.evidence || [];
++    const signals = inv.signals || [];
++    const whyItMatters = inv.explanation || "";
++    const relatedClauses = inv.related_clauses || [];
++    const consequence = inv.consequence || "";
++    const reviewPoints = inv.review_points || [];
++    const stats = inv.stats || { signals: signals.length, related: relatedClauses.length, review: reviewPoints.length };
++    
++    // Update header
++    invEls.contractTitle.textContent = contract.title || "Contract Investigation";
++    
++    // ===== CONTRACT VISUAL =====
++    const clauseCount = contract.clause_count || findings.length;
++    const findingCount = findings.length;
++    invEls.contractTitleText.textContent = contract.title || "CONTRACT";
++    invEls.contractSubtitleText.textContent = `— ${clauseCount} clauses · ${findingCount} findings —`;
++    
++    // Draw contract lines
++    invEls.contractLines.innerHTML = "";
++    for (let i = 0; i < 8; i++) {
++        const y = 330 + i * 42;
++        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
++        line.setAttribute("class", "inv-contract-line");
++        line.setAttribute("x1", "380");
++        line.setAttribute("y1", y);
++        line.setAttribute("x2", "620");
++        line.setAttribute("y2", y);
++        invEls.contractLines.appendChild(line);
++    }
++    
++    // ===== FINDINGS ENTERING =====
++    invEls.findingsGroup.innerHTML = "";
++    findings.forEach((finding, i) => {
++        const angle = (i / Math.max(findings.length, 1)) * 2 * Math.PI - Math.PI / 2;
++        const radius = 280 + (i % 3) * 40;
++        const cx = 500 + Math.cos(angle) * radius;
++        const cy = 500 + Math.sin(angle) * radius;
++        
++        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
++        g.setAttribute("class", "inv-finding-node");
++        g.setAttribute("transform", `translate(${cx}, ${cy})`);
++        g.style.transitionDelay = `${i * 0.15}s`;
++        
++        // Ring
++        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
++        ring.setAttribute("class", "inv-finding-ring");
++        ring.setAttribute("r", "28");
++        ring.setAttribute("cx", "0");
++        ring.setAttribute("cy", "0");
++        
++        // Dot
++        const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
++        dot.setAttribute("class", "inv-finding-dot");
++        dot.setAttribute("cx", "0");
++        dot.setAttribute("cy", "0");
++        
++        // Label
++        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
++        label.setAttribute("class", "inv-finding-label");
++        label.setAttribute("x", "0");
++        label.setAttribute("y", "-38");
++        label.textContent = finding.title || `Finding ${i + 1}`;
++        
++        g.appendChild(ring);
++        g.appendChild(dot);
++        g.appendChild(label);
++        invEls.findingsGroup.appendChild(g);
++        
++        // Trigger visibility after a delay
++        setTimeout(() => {
++            g.classList.add("visible");
++            ring.classList.add("visible");
++            label.classList.add("visible");
++        }, 300 + i * 150);
++    });
++    
++    // ===== FOCUS FINDING =====
++    const riskLevel = (focusFinding.risk_level || "LOW").toUpperCase();
++    const riskScore = focusFinding.risk_score ?? 0;
++    const riskFlags = focusFinding.risk_flags || [];
++    
++    invEls.focusTitle.textContent = focusFinding.title || "Key Finding";
++    invEls.focusRisk.textContent = `${riskLevel} RISK`;
++    invEls.focusRisk.setAttribute("fill", riskLevel === "HIGH" ? "#a64a42" : riskLevel === "MEDIUM" ? "#a36d21" : "#476f69");
++    invEls.focusScore.textContent = `SCORE ${riskScore}`;
++    
++    // Flags
++    invEls.focusFlags.innerHTML = "";
++    riskFlags.forEach((flag, i) => {
++        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
++        text.setAttribute("class", "inv-focus-flag");
++        text.setAttribute("x", "500");
++        text.setAttribute("y", 430 + i * 20);
++        text.textContent = `• ${flag}`;
++        invEls.focusFlags.appendChild(text);
++    });
++    
++    // ===== EVIDENCE =====
++    const clauseText = focusFinding.clause_text || focusFinding.text || "";
++    const evidenceTexts = evidence.map(e => e.text).filter(Boolean);
++    let highlightedText = escapeHtml(clauseText);
++    evidenceTexts.forEach(evText => {
++        const escapedEv = escapeHtml(evText);
++        if (highlightedText.includes(escapedEv)) {
++            highlightedText = highlightedText.replace(
++                escapedEv,
++                `<mark class="evidence-highlight">${escapedEv}</mark>`
++            );
++        }
++    });
++    invEls.evidencePanel.innerHTML = highlightedText || "<em>No clause text available.</em>";
++    
++    // ===== SIGNALS =====
++    if (signals.length > 0) {
++        invEls.signalLabel.textContent = signals[0].flag || "Signal";
++        invEls.signalSub.textContent = `${signals.length} signal${signals.length > 1 ? "s" : ""} detected`;
++        
++        // Orbit rings
++        invEls.signalOrbits.innerHTML = "";
++        signals.forEach((signal, i) => {
++            const ringSize = 140 + i * 70;
++            const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
++            ring.setAttribute("class", "inv-signal-orbit-ring");
++            ring.setAttribute("cx", "500");
++            ring.setAttribute("cy", "500");
++            ring.setAttribute("r", ringSize / 2);
++            ring.style.transitionDelay = `${i * 0.1}s`;
++            invEls.signalOrbits.appendChild(ring);
++            setTimeout(() => ring.classList.add("visible"), 300 + i * 100);
++        });
++        
++        // Signal nodes
++        invEls.signalNodes.innerHTML = "";
++        invEls.signalOrbits.querySelectorAll(".inv-signal-orbit-ring").forEach((ring, ringIdx) => {
++            const r = parseFloat(ring.getAttribute("r"));
++            signals.forEach((signal, i) => {
++                if (i !== ringIdx) return;
++                const angle = (i / signals.length) * 2 * Math.PI - Math.PI / 2;
++                const nodeR = r + 35;
++                const cx = 500 + Math.cos(angle) * nodeR;
++                const cy = 500 + Math.sin(angle) * nodeR;
++                
++                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
++                g.setAttribute("class", "inv-signal-node");
++                g.setAttribute("transform", `translate(${cx}, ${cy})`);
++                g.style.transitionDelay = `${300 + ringIdx * 100 + i * 80}ms`;
++                
++                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
++                circle.setAttribute("class", "inv-signal-node-circle");
++                circle.setAttribute("cx", "0");
++                circle.setAttribute("cy", "0");
++                circle.setAttribute("r", "24");
++                
++                const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
++                labelText.setAttribute("class", "inv-signal-node-text");
++                labelText.setAttribute("x", "0");
++                labelText.setAttribute("y", "-4");
++                labelText.textContent = (signal.flag || "Signal").substring(0, 12);
++                
++                const subText = document.createElementNS("http://www.w3.org/2000/svg", "text");
++                subText.setAttribute("class", "inv-signal-node-sub");
++                subText.setAttribute("x", "0");
++                subText.setAttribute("y", "8");
++                subText.textContent = (signal.reason || "").substring(0, 18);
++                
++                g.appendChild(circle);
++                g.appendChild(labelText);
++                g.appendChild(subText);
++                invEls.signalNodes.appendChild(g);
++                
++                setTimeout(() => g.classList.add("visible"), 300 + ringIdx * 100 + i * 80);
++                
++                // Connector from center
++                const connector = document.createElementNS("http://www.w3.org/2000/svg", "path");
++                connector.setAttribute("class", "inv-signal-connector");
++                const pathData = `M 500 500 Q ${500 + Math.cos(angle) * (r/2)} ${500 + Math.sin(angle) * (r/2)} ${cx} ${cy}`;
++                connector.setAttribute("d", pathData);
++                connector.style.transitionDelay = `${400 + ringIdx * 100 + i * 80}ms`;
++                invEls.signalOrbits.appendChild(connector);
++                setTimeout(() => connector.classList.add("visible"), 400 + ringIdx * 100 + i * 80);
++            });
++        });
++    } else {
++        invEls.signalLabel.textContent = "No signals detected";
++        invEls.signalSub.textContent = "";
++    }
++    
++    // ===== WHY IT MATTERS =====
++    invEls.whyPanel.innerHTML = `
++        <span class="why-title">WHY IT MATTERS</span>
++        ${escapeHtml(whyItMatters || "No explanation provided.")}
++    `;
++    
++    // ===== RELATED CLAUSES =====
++    invEls.relatedCenterLabel.textContent = "CENTRAL";
++    invEls.relatedCenterTitle.textContent = focusFinding.title || "Key Finding";
++    
++    // Orbit rings
++    invEls.relatedOrbits.innerHTML = "";
++    const relatedRings = [180, 280, 380];
++    relatedClauses.forEach((rc, i) => {
++        const ringIdx = Math.min(i, relatedRings.length - 1);
++        const ring = document.createElementNS("http://www.w3.org/2000/svg", "circle");
++        ring.setAttribute("class", "inv-related-orbit-ring");
++        ring.setAttribute("cx", "500");
++        ring.setAttribute("cy", "500");
++        ring.setAttribute("r", relatedRings[ringIdx] / 2);
++        ring.style.transitionDelay = `${i * 0.1}s`;
++        invEls.relatedOrbits.appendChild(ring);
++        setTimeout(() => ring.classList.add("visible"), 300 + i * 100);
++    });
++    
++    // Related nodes
++    invEls.relatedNodes.innerHTML = "";
++    invEls.relatedConnectors.innerHTML = "";
++    relatedClauses.forEach((rc, i) => {
++        const ringIdx = Math.min(i, relatedRings.length - 1);
++        const r = relatedRings[ringIdx] / 2;
++        const angle = (i / relatedClauses.length) * 2 * Math.PI - Math.PI / 2;
++        const nodeR = r + 90;
++        const cx = 500 + Math.cos(angle) * nodeR;
++        const cy = 500 + Math.sin(angle) * nodeR;
++        
++        // Node background
++        const nodeW = 160;
++        const nodeH = 72;
++        const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
++        bg.setAttribute("class", "inv-related-node-bg");
++        bg.setAttribute("x", cx - nodeW/2);
++        bg.setAttribute("y", cy - nodeH/2);
++        bg.setAttribute("width", nodeW);
++        bg.setAttribute("height", nodeH);
++        
++        const typeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
++        typeText.setAttribute("class", "inv-related-node-type");
++        typeText.setAttribute("x", cx);
++        typeText.setAttribute("y", cy - 18);
++        typeText.textContent = rc.type || "Related";
++        
++        const titleText = document.createElementNS("http://www.w3.org/2000/svg", "text");
++        titleText.setAttribute("class", "inv-related-node-title");
++        titleText.setAttribute("x", cx);
++        titleText.setAttribute("y", cy + 2);
++        titleText.textContent = (rc.title || "Related Clause").substring(0, 20);
++        
++        const relText = document.createElementNS("http://www.w3.org/2000/svg", "text");
++        relText.setAttribute("class", "inv-related-node-rel");
++        relText.setAttribute("x", cx);
++        relText.setAttribute("y", cy + 18);
++        relText.textContent = (rc.relationship || "Related").substring(0, 22);
++        
++        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
++        g.setAttribute("class", "inv-related-node");
++        g.style.transitionDelay = `${400 + i * 120}ms`;
++        g.appendChild(bg);
++        g.appendChild(typeText);
++        g.appendChild(titleText);
++        g.appendChild(relText);
++        invEls.relatedNodes.appendChild(g);
++        
++        setTimeout(() => g.classList.add("visible"), 400 + i * 120);
++        
++        // Connector from center
++        const connector = document.createElementNS("http://www.w3.org/2000/svg", "path");
++        connector.setAttribute("class", "inv-related-connector");
++        const ctrlX = 500 + Math.cos(angle) * (r + 30);
++        const ctrlY = 500 + Math.sin(angle) * (r + 30);
++        const pathData = `M 500 500 Q ${ctrlX} ${ctrlY} ${cx - Math.cos(angle) * (nodeW/2 + 5)} ${cy - Math.sin(angle) * (nodeH/2 + 5)}`;
++        connector.setAttribute("d", pathData);
++        connector.style.transitionDelay = `${500 + i * 120}ms`;
++        invEls.relatedConnectors.appendChild(connector);
++        
++        setTimeout(() => connector.classList.add("visible"), 500 + i * 120);
++    });
++    
++    // ===== CONSEQUENCE =====
++    invEls.consequencePanel.innerHTML = `
++        <span class="consequence-label">WHAT THIS MEANS</span>
++        <div class="consequence-text">${escapeHtml(consequence || "No consequence analysis provided.")}</div>
++    `;
++    
++    // ===== COMPLETE =====
++    invEls.completeStats.textContent = `Signals: ${stats.signals} · Related Clauses: ${stats.related} · Review Points: ${stats.review}`;
++    invEls.reviewPanel.innerHTML = `
++        <span class="review-title">WHAT TO REVIEW</span>
++        <ul>${reviewPoints.map(p => `<li>${escapeHtml(p)}</li>`).join("")}</ul>
++    `;
++    
++    // Reset step
++    currentStepIndex = 0;
++    updateStepProgress(0);
++}
++
++function setupInvestigationAnimations() {
++    // Check if GSAP is available
++    if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") {
++        document.body.classList.add("no-gsap");
++        // Show all groups statically
++        [invEls.contractGroup, invEls.findingsGroup, invEls.focusGroup, 
++         invEls.evidenceGroup, invEls.signalGroup, invEls.whyGroup,
++         invEls.relatedGroup, invEls.consequenceGroup, invEls.completeGroup]
++            .forEach(g => g && (g.style.display = "block"));
++        return;
++    }
++    
++    // Register ScrollTrigger
++    gsap.registerPlugin(ScrollTrigger);
++    
++    // Kill any existing timeline
++    if (investigationTimeline) {
++        investigationTimeline.kill();
++    }
++    investigationScrollTriggers.forEach(st => st.kill());
++    investigationScrollTriggers = [];
++    
++    const canvas = invEls.canvas;
++    const stepCount = 8; // Contract, Findings, Focus, Evidence, Signal, Relations, Consequence, Complete
++    
++    // Create main timeline pinned to canvas
++    investigationTimeline = gsap.timeline({
++        scrollTrigger: {
++            trigger: canvas,
++            start: "top top",
++            end: "+=" + (stepCount * 500),
++            scrub: 1,
++            pin: true,
++            anticipatePin: 1,
++            onUpdate: self => {
++                const progress = self.progress;
++                const stepIndex = Math.min(Math.floor(progress * stepCount), stepCount - 1);
++                if (stepIndex !== currentStepIndex) {
++                    currentStepIndex = stepIndex;
++                    updateStepProgress(stepIndex);
++                    triggerStepAnimations(stepIndex);
++                }
++                
++                // Update timeline dot position
++                if (invEls.timelineDot) {
++                    const stepHeight = 500;
++                    const y = 50 + progress * (stepCount * stepHeight);
++                    gsap.set(invEls.timelineDot, { 
++                        cy: y,
++                        attr: { cy: y }
++                    });
++                }
++            }
++        }
++    });
++    
++    // Initial states
++    gsap.set([invEls.focusGroup, invEls.evidenceGroup, invEls.signalGroup, 
++              invEls.whyGroup, invEls.relatedGroup, invEls.consequenceGroup, invEls.completeGroup], 
++             { display: "none", opacity: 0 });
++    gsap.set(invEls.contractGroup, { opacity: 1 });
++    gsap.set(invEls.findingsGroup, { opacity: 1 });
++    gsap.set(invEls.timelineDot, { opacity: 1, cy: 50 });
++    
++    // Update progress marker position
++    updateStepProgress(0);
++}
++
++function triggerStepAnimations(stepIndex) {
++    if (prefersReducedMotion) return;
++    
++    switch (stepIndex) {
++        case 0: // Contract - initial state
++            gsap.to(invEls.contractGroup, { opacity: 1, duration: 0.5 });
++            gsap.to(invEls.findingsGroup, { opacity: 1, duration: 0.5 });
++            gsap.to([invEls.focusGroup, invEls.evidenceGroup, invEls.signalGroup, 
++                     invEls.whyGroup, invEls.relatedGroup, invEls.consequenceGroup, invEls.completeGroup], 
++                    { display: "none", opacity: 0, duration: 0.3 });
++            break;
++            
++        case 1: // Findings entering
++            gsap.to(invEls.contractGroup, { opacity: 0.6, duration: 0.5 });
++            gsap.to(invEls.findingsGroup, { opacity: 1, duration: 0.5 });
++            gsap.to([invEls.focusGroup, invEls.evidenceGroup, invEls.signalGroup, 
++                     invEls.whyGroup, invEls.relatedGroup, invEls.consequenceGroup, invEls.completeGroup], 
++                    { display: "none", opacity: 0, duration: 0.3 });
++            break;
++            
++        case 2: // Focus finding
++            gsap.to(invEls.contractGroup, { opacity: 0.3, duration: 0.5 });
++            gsap.to(invEls.findingsGroup, { opacity: 0.3, duration: 0.5 });
++            gsap.set(invEls.focusGroup, { display: "block" });
++            gsap.to(invEls.focusGroup, { opacity: 1, duration: 0.6, ease: "power2.out" });
++            gsap.to([invEls.evidenceGroup, invEls.signalGroup, invEls.whyGroup,
++                     invEls.relatedGroup, invEls.consequenceGroup, invEls.completeGroup], 
++                    { display: "none", opacity: 0, duration: 0.3 });
++            
++            // Animate focus base
++            gsap.from(invEls.focusBase, { 
++                scale: 0.9, 
++                opacity: 0, 
++                duration: 0.6, 
++                ease: "power2.out" 
++            });
++            break;
++            
++        case 3: // Evidence
++            gsap.set(invEls.evidenceGroup, { display: "block" });
++            gsap.to(invEls.evidenceGroup, { opacity: 1, duration: 0.5 });
++            gsap.to(invEls.focusGroup, { opacity: 0.5, duration: 0.3 });
++            
++            // Animate connector path drawing
++            if (invEls.connectorPath) {
++                const path = invEls.connectorPath;
++                const length = path.getTotalLength();
++                gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
++                gsap.to(path, {
++                    strokeDashoffset: 0,
++                    duration: 1.2,
++                    ease: "power2.inOut"
++                });
++            }
++            break;
++            
++        case 4: // Signal
++            gsap.set(invEls.signalGroup, { display: "block" });
++            gsap.to(invEls.signalGroup, { opacity: 1, duration: 0.5 });
++            gsap.set(invEls.whyGroup, { display: "block" });
++            gsap.to(invEls.whyGroup, { opacity: 1, duration: 0.5, delay: 0.3 });
++            
++            // Animate signal center
++            gsap.from(invEls.signalCenter, { 
++                scale: 0.5, 
++                opacity: 0, 
++                duration: 0.6, 
++                ease: "back.out(1.7)" 
++            });
++            break;
++            
++        case 5: // Relations
++            gsap.set(invEls.relatedGroup, { display: "block" });
++            gsap.to(invEls.relatedGroup, { opacity: 1, duration: 0.6 });
++            gsap.to([invEls.signalGroup, invEls.whyGroup], { opacity: 0.4, duration: 0.3 });
++            
++            // Animate center node
++            gsap.from(invEls.relatedCenterNode.children, { 
++                scale: 0.5, 
++                opacity: 0, 
++                duration: 0.5, 
++                ease: "back.out(1.7)",
++                stagger: 0.1
++            });
++            break;
++            
++        case 6: // Consequence
++            gsap.set(invEls.consequenceGroup, { display: "block" });
++            gsap.to(invEls.consequenceGroup, { opacity: 1, duration: 0.6, ease: "power2.out" });
++            gsap.to(invEls.relatedGroup, { opacity: 0.3, duration: 0.3 });
++            
++            // Animate consequence panel
++            gsap.from(invEls.consequencePanel, { 
++                y: 30, 
++                opacity: 0, 
++                duration: 0.6, 
++                ease: "power2.out" 
++            });
++            break;
++            
++        case 7: // Complete
++            gsap.set(invEls.completeGroup, { display: "block" });
++            gsap.to(invEls.completeGroup, { opacity: 1, duration: 0.6, ease: "power2.out" });
++            gsap.to([invEls.consequenceGroup, invEls.relatedGroup, invEls.signalGroup], 
++                    { opacity: 0.2, duration: 0.3 });
++            break;
++    }
++}
++
++function updateStepProgress(stepIndex) {
++    // Update progress marker position
++    if (invEls.progressMarker && invEls.progressSteps.length > 0) {
++        const stepHeight = 54; // Approximate height per step
++        const top = stepIndex * stepHeight;
++        gsap.to(invEls.progressMarker, { 
++            top: top, 
++            duration: 0.8, 
++            ease: "power2.out" 
++        });
++    }
++    
++    // Update step labels
++    invEls.progressSteps.forEach((step, i) => {
++        step.classList.toggle("active", i === stepIndex);
++        step.classList.toggle("complete", i < stepIndex);
++    });
++}
++
++function cleanupInvestigationAnimations() {
++    if (investigationTimeline) {
++        investigationTimeline.kill();
++        investigationTimeline = null;
++    }
++    investigationScrollTriggers.forEach(st => st.kill());
++    investigationScrollTriggers = [];
++    
++    // Reset all groups
++    [invEls.contractGroup, invEls.findingsGroup, invEls.focusGroup, 
++     invEls.evidenceGroup, invEls.signalGroup, invEls.whyGroup,
++     invEls.relatedGroup, invEls.consequenceGroup, invEls.completeGroup]
++        .forEach(g => {
++            if (g) {
++                g.style.display = "";
++                gsap.set(g, { clearProps: "all" });
++            }
++        });
++    
++    // Reset SVG elements
++    if (invEls.connectorPath) {
++        gsap.set(invEls.connectorPath, { clearProps: "all" });
++    }
++    if (invEls.timelineDot) {
++        gsap.set(invEls.timelineDot, { clearProps: "all", opacity: 0 });
++    }
++    
++    currentStepIndex = 0;
++}
++
++function replayInvestigation() {
++    // Scroll back to top
++    window.scrollTo({ top: 0, behavior: "smooth" });
++    
++    // Reset animations
++    cleanupInvestigationAnimations();
++    
++    // Re-setup after a brief delay
++    setTimeout(() => {
++        setupInvestigationAnimations();
++        currentStepIndex = 0;
++        updateStepProgress(0);
++    }, 300);
++}
++
++// Update showView to include investigationView
++const originalShowView = showView;
++function showView(view) {
++    const viewIds = [
++        "uploadView",
++        "processingView",
++        "overviewView",
++        "groupView",
++        "askContractView",
++        "investigationView"
++    ];
++    
++    viewIds.forEach((viewId) => {
++        const element = document.getElementById(viewId);
++        if (element) {
++            element.classList.add("hidden");
++        }
++    });
++    
++    const targetView = typeof view === "string" ? document.getElementById(view) : view;
++    if (!targetView) {
++        console.error("showView: target view not found:", view);
++        return;
++    }
++    targetView.classList.remove("hidden");
++}
++
+ /* ============================================================
+    INITIALIZE
+ ========================================================== */

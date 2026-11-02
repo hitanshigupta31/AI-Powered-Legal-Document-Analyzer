@@ -1,0 +1,1429 @@
+
+/* ============================================================
+   CLAUSEGUARD — INK & IVORY DESIGN SYSTEM
+   Shared theme for dashboard, authentication and Watchtower.
+   Visual-only layer: preserve existing application behaviour.
+============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+    --cg-ink: #0A0B0B;
+    --cg-surface: #101211;
+    --cg-surface-raised: #171917;
+    --cg-surface-hover: #20231F;
+
+    --cg-ivory: #F2F0E9;
+    --cg-stone: #9A9B93;
+    --cg-brass: #B7A16B;
+    --cg-brass-soft: rgba(183, 161, 107, 0.12);
+
+    --cg-border: rgba(242, 240, 233, 0.11);
+    --cg-border-strong: rgba(242, 240, 233, 0.20);
+
+    --cg-red: #C8786F;
+    --cg-amber: #C7A56A;
+    --cg-green: #87A895;
+
+    --cg-serif: "Fraunces", Georgia, serif;
+    --cg-sans: "Inter", Arial, sans-serif;
+
+    --cg-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --cg-duration: 260ms;
+}
+
+/* ============================================================
+   GLOBAL FOUNDATIONS
+============================================================ */
+
+html {
+    scroll-behavior: smooth;
+    scrollbar-color: #484941 var(--cg-ink);
+}
+
+body {
+    background: var(--cg-ink);
+    color: var(--cg-ivory);
+    font-family: var(--cg-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+body,
+.app-shell,
+.main-area,
+.page-content {
+    background-color: var(--cg-ink);
+    color: var(--cg-ivory);
+}
+
+h1,
+h2,
+h3,
+h4,
+.results-heading h1,
+.hero-copy h1,
+.upload-card h2,
+.group-header h1,
+.chat-header h1 {
+    color: var(--cg-ivory);
+    font-family: var(--cg-serif);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+}
+
+p {
+    color: var(--cg-stone);
+    line-height: 1.75;
+}
+
+button,
+input,
+textarea,
+select {
+    font-family: var(--cg-sans);
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--cg-brass);
+    outline-offset: 4px;
+}
+
+::selection {
+    color: var(--cg-ink);
+    background: var(--cg-brass);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.error-banner {
+    border: 1px solid rgba(200, 120, 111, 0.38);
+    border-radius: 10px;
+    background: rgba(200, 120, 111, 0.08);
+    color: var(--cg-red);
+}
+
+/* ============================================================
+   MAIN APP SHELL
+============================================================ */
+
+.app-shell {
+    min-height: 100vh;
+    background: var(--cg-ink);
+}
+
+.app-shell .sidebar {
+    background: #0D0F0E;
+    color: var(--cg-ivory);
+    border-right: 1px solid var(--cg-border);
+    box-shadow: none;
+}
+
+.app-shell .brand {
+    gap: 12px;
+}
+
+.app-shell .brand-mark {
+    display: grid;
+    place-items: center;
+    background: var(--cg-brass);
+    color: var(--cg-ink);
+    border: 1px solid rgba(242, 240, 233, 0.18);
+    border-radius: 10px;
+    box-shadow: 0 5px 24px rgba(183, 161, 107, 0.09);
+    font-family: var(--cg-serif);
+    font-weight: 600;
+    transition:
+        transform 350ms var(--cg-ease),
+        box-shadow 350ms var(--cg-ease);
+}
+
+.app-shell .brand:hover .brand-mark {
+    transform: rotate(-4deg) scale(1.04);
+    box-shadow: 0 8px 30px rgba(183, 161, 107, 0.18);
+}
+
+.app-shell .brand-name {
+    color: var(--cg-ivory);
+    font-family: var(--cg-serif);
+    font-size: 1.35rem;
+    font-weight: 500;
+    letter-spacing: -0.035em;
+}
+
+.app-shell .brand-subtitle {
+    color: var(--cg-stone);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+}
+
+.app-shell .sidebar-label {
+    color: var(--cg-stone);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.17em;
+}
+
+.app-shell .nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    overflow: hidden;
+
+    border: 1px solid transparent;
+    border-radius: 8px;
+
+    background: transparent;
+    color: var(--cg-stone);
+
+    transition:
+        color var(--cg-duration) ease,
+        background var(--cg-duration) ease,
+        border-color var(--cg-duration) ease,
+        transform var(--cg-duration) var(--cg-ease);
+}
+
+.app-shell .nav-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 25%;
+    bottom: 25%;
+    width: 2px;
+    border-radius: 3px;
+    background: var(--cg-brass);
+
+    transform: scaleY(0);
+    transition: transform 240ms var(--cg-ease);
+}
+
+.app-shell .nav-item:hover {
+    background: rgba(242, 240, 233, 0.045);
+    color: var(--cg-ivory);
+    border-color: var(--cg-border);
+    transform: translateX(2px);
+}
+
+.app-shell .nav-item.active {
+    background: var(--cg-brass-soft);
+    color: var(--cg-ivory);
+    border-color: rgba(183, 161, 107, 0.22);
+}
+
+.app-shell .nav-item.active::before {
+    transform: scaleY(1);
+}
+
+.app-shell .nav-icon {
+    color: var(--cg-brass);
+    transition: transform 240ms var(--cg-ease);
+}
+
+.app-shell .nav-item:hover .nav-icon {
+    transform: scale(1.08);
+}
+
+.app-shell .engine-copy strong {
+    color: var(--cg-ivory);
+    font-weight: 600;
+}
+
+.app-shell .engine-copy p {
+    color: var(--cg-stone);
+    font-size: 12px;
+    line-height: 1.75;
+}
+
+.app-shell .sidebar-status {
+    color: var(--cg-stone);
+    font-size: 11px;
+}
+
+.app-shell .status-dot {
+    background: var(--cg-green);
+    box-shadow: 0 0 12px rgba(135, 168, 149, 0.28);
+}
+
+.app-shell .workspace-profile {
+    border-top-color: var(--cg-border);
+}
+
+.app-shell .profile-initials {
+    background: var(--cg-surface-raised);
+    color: var(--cg-brass);
+    border: 1px solid var(--cg-border);
+    border-radius: 8px;
+}
+
+.app-shell .profile-name {
+    color: var(--cg-ivory);
+}
+
+.app-shell .profile-meta {
+    color: var(--cg-stone);
+}
+
+.app-shell .sidebar-logout {
+    background: transparent;
+    color: var(--cg-stone);
+    border: 1px solid var(--cg-border);
+    border-radius: 7px;
+
+    transition:
+        color var(--cg-duration) ease,
+        background var(--cg-duration) ease,
+        border-color var(--cg-duration) ease;
+}
+
+.app-shell .sidebar-logout:hover {
+    color: var(--cg-ivory);
+    background: rgba(242, 240, 233, 0.05);
+    border-color: var(--cg-border-strong);
+}
+
+/* ============================================================
+   TOP BAR AND BREADCRUMB
+============================================================ */
+
+.app-shell .main-area {
+    min-width: 0;
+    background: var(--cg-ink);
+}
+
+.app-shell .topbar {
+    background: rgba(10, 11, 11, 0.94);
+    color: var(--cg-ivory);
+    border-bottom: 1px solid var(--cg-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.app-shell .breadcrumb {
+    color: var(--cg-stone);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+}
+
+.app-shell .breadcrumb strong {
+    color: var(--cg-ivory);
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+.app-shell .topbar-action {
+    background: var(--cg-brass);
+    color: var(--cg-ink);
+    border: 1px solid var(--cg-brass);
+    border-radius: 7px;
+    font-weight: 700;
+
+    transition:
+        background var(--cg-duration) ease,
+        color var(--cg-duration) ease,
+        transform var(--cg-duration) var(--cg-ease),
+        box-shadow var(--cg-duration) ease;
+}
+
+.app-shell .topbar-action:hover {
+    background: #C9B783;
+    border-color: #C9B783;
+    color: var(--cg-ink);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(183, 161, 107, 0.13);
+}
+
+/* ============================================================
+   UPLOAD / LANDING VIEW
+============================================================ */
+
+.app-shell .page-content {
+    background:
+        radial-gradient(
+            ellipse at 75% 5%,
+            rgba(183, 161, 107, 0.035),
+            transparent 34%
+        ),
+        var(--cg-ink);
+}
+
+.app-shell .hero-copy .eyebrow,
+.app-shell .eyebrow,
+.app-shell .section-kicker {
+    color: var(--cg-brass);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+}
+
+.app-shell .hero-copy h1 {
+    max-width: 950px;
+    font-size: clamp(2.8rem, 5vw, 5.4rem);
+    line-height: 0.99;
+    letter-spacing: -0.055em;
+    text-wrap: balance;
+}
+
+.app-shell .hero-copy p {
+    max-width: 760px;
+    color: var(--cg-stone);
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.app-shell .upload-card {
+    position: relative;
+    overflow: hidden;
+
+    background: linear-gradient(
+        145deg,
+        rgba(23, 25, 23, 0.98),
+        rgba(15, 17, 16, 0.98)
+    );
+
+    border: 1px solid var(--cg-border);
+    border-radius: 14px;
+    box-shadow: 0 20px 65px rgba(0, 0, 0, 0.16);
+
+    transition:
+        border-color 300ms ease,
+        box-shadow 300ms ease,
+        transform 300ms var(--cg-ease);
+}
+
+.app-shell .upload-card:hover {
+    border-color: rgba(183, 161, 107, 0.24);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.23);
+}
+
+.app-shell .upload-card h2 {
+    font-size: clamp(1.6rem, 2.5vw, 2.25rem);
+    line-height: 1.15;
+}
+
+.app-shell .file-type-line {
+    color: var(--cg-stone);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+}
+
+.app-shell .dropzone {
+    border: 1px dashed rgba(242, 240, 233, 0.2);
+    border-radius: 10px;
+    background: rgba(242, 240, 233, 0.018);
+
+    transition:
+        background 250ms ease,
+        border-color 250ms ease,
+        transform 250ms var(--cg-ease);
+}
+
+.app-shell .dropzone:hover,
+.app-shell .dropzone:focus-visible,
+.app-shell .dropzone.drag-over,
+.app-shell .dropzone.dragover {
+    background: rgba(183, 161, 107, 0.055);
+    border-color: var(--cg-brass);
+}
+
+.app-shell .upload-icon {
+    color: var(--cg-brass);
+    transition: transform 300ms var(--cg-ease);
+}
+
+.app-shell .dropzone:hover .upload-icon {
+    transform: translateY(-4px);
+}
+
+.app-shell .drop-title {
+    color: var(--cg-ivory);
+    font-family: var(--cg-serif);
+    font-size: 1.25rem;
+}
+
+.app-shell .drop-subtitle {
+    color: var(--cg-stone);
+    font-size: 12px;
+}
+
+.app-shell .selected-file {
+    color: var(--cg-brass);
+    overflow-wrap: anywhere;
+}
+
+.app-shell .upload-footer {
+    color: var(--cg-stone);
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+/* ============================================================
+   BUTTON SYSTEM
+============================================================ */
+
+.app-shell .primary-btn,
+.app-shell .secondary-btn,
+.app-shell .chat-send-btn {
+    border-radius: 7px;
+    font-weight: 600;
+
+    transition:
+        color var(--cg-duration) ease,
+        background var(--cg-duration) ease,
+        border-color var(--cg-duration) ease,
+        box-shadow var(--cg-duration) ease,
+        transform var(--cg-duration) var(--cg-ease);
+}
+
+.app-shell .primary-btn {
+    background: var(--cg-brass);
+    color: var(--cg-ink);
+    border: 1px solid var(--cg-brass);
+}
+
+.app-shell .primary-btn:hover:not(:disabled) {
+    background: #C9B783;
+    border-color: #C9B783;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(183, 161, 107, 0.12);
+}
+
+.app-shell .primary-btn:disabled {
+    background: #34352F;
+    border-color: #34352F;
+    color: #89877D;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.app-shell .secondary-btn {
+    background: transparent;
+    color: var(--cg-ivory);
+    border: 1px solid var(--cg-border-strong);
+}
+
+.app-shell .secondary-btn:hover {
+    background: rgba(242, 240, 233, 0.06);
+    border-color: var(--cg-brass);
+    color: var(--cg-brass);
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   HOW IT WORKS
+============================================================ */
+
+.app-shell .how-it-works {
+    border-top: 1px solid var(--cg-border);
+}
+
+.app-shell .workflow-step {
+    position: relative;
+    border-top: 1px solid var(--cg-border);
+    transition: border-color 250ms ease;
+}
+
+.app-shell .workflow-step:hover {
+    border-top-color: var(--cg-brass);
+}
+
+.app-shell .step-number {
+    color: var(--cg-brass);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+
+.app-shell .workflow-step h3 {
+    color: var(--cg-ivory);
+    font-size: 1.3rem;
+}
+
+.app-shell .workflow-step p {
+    color: var(--cg-stone);
+    font-size: 12px;
+}
+
+/* ============================================================
+   PROCESSING VIEW
+============================================================ */
+
+.app-shell .processing-card {
+    background: var(--cg-surface);
+    border: 1px solid var(--cg-border);
+    border-radius: 14px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+}
+
+.app-shell .processing-mark {
+    background: var(--cg-brass);
+    color: var(--cg-ink);
+    border-radius: 10px;
+    font-family: var(--cg-serif);
+}
+
+.app-shell .processing-card h1 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.app-shell .processing-card p,
+.app-shell .processing-steps {
+    color: var(--cg-stone);
+}
+
+.app-shell .progress-track {
+    overflow: hidden;
+    background: #292B27;
+    border-radius: 20px;
+}
+
+.app-shell .progress-bar {
+    background: var(--cg-brass);
+    box-shadow: 0 0 14px rgba(183, 161, 107, 0.2);
+}
+
+/* ============================================================
+   RISK OVERVIEW
+============================================================ */
+
+.app-shell .results-heading h1 {
+    font-size: clamp(2.4rem, 4vw, 4rem);
+    line-height: 1.05;
+}
+
+.app-shell .results-heading p {
+    font-size: 12px;
+}
+
+.app-shell .summary-strip {
+    background: var(--cg-surface);
+    border: 1px solid var(--cg-border);
+    border-radius: 12px;
+}
+
+.app-shell .summary-metric {
+    border-right-color: var(--cg-border);
+}
+
+.app-shell .summary-metric > span {
+    color: var(--cg-stone);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+}
+
+.app-shell .summary-metric strong {
+    color: var(--cg-ivory);
+    font-family: var(--cg-serif);
+    font-size: 2rem;
+    font-weight: 500;
+}
+
+.app-shell .summary-note {
+    color: var(--cg-stone);
+    font-size: 11px;
+}
+
+.app-shell .summary-dot {
+    background: var(--cg-brass);
+    box-shadow: 0 0 10px rgba(183, 161, 107, 0.2);
+}
+
+.app-shell .risk-section-head h2,
+.app-shell .priority-section h2 {
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+    line-height: 1.14;
+}
+
+.app-shell .risk-card {
+    position: relative;
+    overflow: hidden;
+
+    background: var(--cg-surface);
+    border: 1px solid var(--cg-border);
+    border-radius: 12px;
+    color: var(--cg-ivory);
+
+    transition:
+        transform 300ms var(--cg-ease),
+        border-color 250ms ease,
+        background 250ms ease,
+        box-shadow 300ms ease;
+}
+
+.app-shell .risk-card:hover {
+    transform: translateY(-5px);
+    background: var(--cg-surface-raised);
+    border-color: var(--cg-border-strong);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+.app-shell .risk-low {
+    --risk-accent: var(--cg-green);
+}
+
+.app-shell .risk-medium {
+    --risk-accent: var(--cg-amber);
+}
+
+.app-shell .risk-high {
+    --risk-accent: var(--cg-red);
+}
+
+.app-shell .risk-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--risk-accent, var(--cg-brass));
+    opacity: 0.7;
+    transform: scaleX(0.25);
+    transform-origin: left;
+    transition: transform 350ms var(--cg-ease);
+}
+
+.app-shell .risk-card:hover::before {
+    transform: scaleX(1);
+}
+
+.app-shell .risk-pill {
+    color: var(--risk-accent);
+    border-color: color-mix(
+        in srgb,
+        var(--risk-accent) 35%,
+        transparent
+    );
+    background: color-mix(
+        in srgb,
+        var(--risk-accent) 8%,
+        transparent
+    );
+}
+
+.app-shell .risk-count {
+    color: var(--cg-ivory);
+    font-family: var(--cg-serif);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.app-shell .risk-card h3 {
+    color: var(--cg-ivory);
+}
+
+.app-shell .risk-card p {
+    color: var(--cg-stone);
+}
+
+/* ============================================================
+   PRIORITY REVIEW AND CLAUSE INSPECTION
+============================================================ */
+
+.app-shell .priority-section {
+    border-top: 1px solid var(--cg-border);
+}
+
+.app-shell .priority-grid > *,
+.app-shell .clause-grid > * {
+    transition:
+        transform 260ms var(--cg-ease),
+        border-color 260ms ease,
+        background 260ms ease;
+}
+
+.app-shell .priority-grid > *:hover,
+.app-shell .clause-grid > *:hover {
+    transform: translateY(-3px);
+    border-color: rgba(183, 161, 107, 0.34);
+}
+
+.app-shell .group-header h1 {
+    font-size: clamp(2.3rem, 4vw, 3.8rem);
+}
+
+.app-shell .back-link {
+    background: transparent;
+    color: var(--cg-brass);
+    border: 0;
+    padding-left: 0;
+    transition:
+        color 200ms ease,
+        transform 200ms var(--cg-ease);
+}
+
+.app-shell .back-link:hover {
+    color: var(--cg-ivory);
+    transform: translateX(-3px);
+}
+
+.app-shell .group-layout {
+    gap: 24px;
+}
+
+.app-shell .clause-toolbar {
+    color: var(--cg-stone);
+    border-bottom-color: var(--cg-border);
+}
+
+.app-shell .detail-panel {
+    background: var(--cg-surface);
+    color: var(--cg-ivory);
+    border: 1px solid var(--cg-border);
+    border-radius: 12px;
+}
+
+.app-shell .detail-empty-mark {
+    background: var(--cg-brass-soft);
+    color: var(--cg-brass);
+    border: 1px solid rgba(183, 161, 107, 0.2);
+    border-radius: 10px;
+}
+
+.app-shell .detail-panel h3 {
+    color: var(--cg-ivory);
+}
+
+.app-shell .detail-panel p {
+    color: var(--cg-stone);
+}
+
+/* ============================================================
+   ASK YOUR CONTRACT
+============================================================ */
+
+.app-shell .chat-header {
+    border-bottom-color: var(--cg-border);
+}
+
+.app-shell .chat-header h1 {
+    font-size: clamp(2.3rem, 4vw, 3.6rem);
+}
+
+.app-shell .chat-subtitle {
+    color: var(--cg-stone);
+}
+
+.app-shell .chat-messages {
+    color: var(--cg-ivory);
+}
+
+.app-shell .chat-messages > * {
+    animation: cg-message-in 420ms var(--cg-ease) both;
+}
+
+.app-shell .chat-starter {
+    background: var(--cg-surface);
+    border: 1px solid var(--cg-border);
+    border-radius: 12px;
+}
+
+.app-shell .starter-label {
+    color: var(--cg-stone);
+}
+
+.app-shell .starter-btn {
+    color: var(--cg-ivory);
+    background: var(--cg-surface-raised);
+    border: 1px solid var(--cg-border);
+    border-radius: 8px;
+    transition:
+        background 220ms ease,
+        border-color 220ms ease,
+        color 220ms ease,
+        transform 220ms var(--cg-ease);
+}
+
+.app-shell .starter-btn:hover {
+    background: var(--cg-brass-soft);
+    border-color: rgba(183, 161, 107, 0.38);
+    color: var(--cg-ivory);
+    transform: translateY(-2px);
+}
+
+.app-shell .chat-input-area {
+    border-top-color: var(--cg-border);
+}
+
+.app-shell .chat-input-wrapper {
+    background: var(--cg-surface);
+    border: 1px solid var(--cg-border-strong);
+    border-radius: 10px;
+    transition: border-color 220ms ease;
+}
+
+.app-shell .chat-input-wrapper:focus-within {
+    border-color: var(--cg-brass);
+}
+
+.app-shell .chat-input {
+    color: var(--cg-ivory);
+    background: transparent;
+}
+
+.app-shell .chat-input::placeholder {
+    color: #777970;
+}
+
+.app-shell .chat-send-btn {
+    background: var(--cg-brass);
+    color: var(--cg-ink);
+}
+
+.app-shell .chat-send-btn:hover {
+    background: #C9B783;
+    transform: translateX(2px);
+}
+
+.app-shell textarea,
+.app-shell input,
+.app-shell select {
+    color: var(--cg-ivory);
+    background-color: var(--cg-surface);
+    border-color: var(--cg-border-strong);
+}
+
+.app-shell textarea:focus,
+.app-shell input:focus,
+.app-shell select:focus {
+    border-color: var(--cg-brass);
+    box-shadow: 0 0 0 3px rgba(183, 161, 107, 0.09);
+    outline: none;
+}
+
+/* ============================================================
+   VIEW TRANSITIONS
+============================================================ */
+
+.app-shell .view:not(.hidden) {
+    animation: cg-view-enter 580ms var(--cg-ease) both;
+}
+
+@keyframes cg-view-enter {
+    from {
+        opacity: 0;
+        transform: translateY(9px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cg-message-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================================
+   SCROLL-REVEAL MOTION — DASHBOARD
+============================================================ */
+
+.app-shell .cg-reveal {
+    opacity: 0;
+    transform: translateY(18px);
+
+    transition:
+        opacity 650ms var(--cg-ease),
+        transform 650ms var(--cg-ease);
+
+    transition-delay: calc(var(--cg-stagger, 0) * 65ms);
+}
+
+.app-shell .cg-reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================================
+   AUTHENTICATION PAGES
+============================================================ */
+
+body.auth-page {
+    min-height: 100vh;
+    background: var(--cg-ink);
+    color: var(--cg-ivory);
+}
+
+.auth-page .auth-shell {
+    background: var(--cg-ink);
+}
+
+.auth-page .auth-brand-panel {
+    background:
+        radial-gradient(
+            ellipse at 25% 15%,
+            rgba(183, 161, 107, 0.10),
+            transparent 42%
+        ),
+        #0D0F0E;
+    border-right: 1px solid var(--cg-border);
+    color: var(--cg-ivory);
+}
+
+.auth-page .auth-brand-panel h1 {
+    color: var(--cg-ivory);
+    font-family: var(--cg-serif);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+}
+
+.auth-page .auth-brand-panel p,
+.auth-page .auth-footer-copy {
+    color: var(--cg-stone);
+}
+
+.auth-page .auth-form-panel {
+    background: var(--cg-ink);
+    color: var(--cg-ivory);
+}
+
+.auth-page .auth-form-wrap {
+    color: var(--cg-ivory);
+}
+
+.auth-page h1,
+.auth-page h2,
+.auth-page h3 {
+    color: var(--cg-ivory);
+    font-family: var(--cg-serif);
+    font-weight: 500;
+}
+
+.auth-page label {
+    color: var(--cg-stone);
+}
+
+.auth-page input,
+.auth-page textarea,
+.auth-page select {
+    background: var(--cg-surface);
+    color: var(--cg-ivory);
+    border: 1px solid var(--cg-border-strong);
+    border-radius: 8px;
+}
+
+.auth-page input:focus,
+.auth-page textarea:focus,
+.auth-page select:focus {
+    border-color: var(--cg-brass);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(183, 161, 107, 0.09);
+}
+
+.auth-page input::placeholder {
+    color: #74766E;
+}
+
+.auth-page button[type="submit"],
+.auth-page .primary-btn {
+    background: var(--cg-brass);
+    color: var(--cg-ink);
+    border: 1px solid var(--cg-brass);
+    border-radius: 8px;
+    font-weight: 700;
+    transition:
+        background 230ms ease,
+        transform 230ms var(--cg-ease),
+        box-shadow 230ms ease;
+}
+
+.auth-page button[type="submit"]:hover,
+.auth-page .primary-btn:hover {
+    background: #C9B783;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(183, 161, 107, 0.12);
+}
+
+.auth-page a {
+    color: var(--cg-brass);
+    text-underline-offset: 3px;
+}
+
+/* ============================================================
+   WATCHTOWER — MATCH THE SHARED VISUAL SYSTEM
+============================================================ */
+
+:root {
+    --bg: #0A0B0B;
+    --surface: #101211;
+    --surface-2: #171917;
+    --line: rgba(242, 240, 233, 0.11);
+    --line-strong: rgba(242, 240, 233, 0.2);
+
+    --text: #F2F0E9;
+    --muted: #9A9B93;
+    --muted-2: #6F7169;
+
+    --acid: #B7A16B;
+    --acid-soft: rgba(183, 161, 107, 0.12);
+    --warning: #C7A56A;
+
+    --ink: #0A0B0B;
+    --cream: #F2F0E9;
+    --cream-2: #D7D4C9;
+    --gold: #B7A16B;
+    --gold-soft: rgba(183, 161, 107, 0.16);
+    --rule: rgba(242, 240, 233, 0.11);
+}
+
+body:has(.watchtower-shell) {
+    background: var(--cg-ink);
+    color: var(--cg-ivory);
+}
+
+.watchtower-shell {
+    color: var(--cg-ivory);
+    background: transparent;
+}
+
+.watchtower-shell .topbar {
+    border-bottom-color: var(--cg-border);
+}
+
+.watchtower-shell .brand-mark {
+    background: var(--cg-brass);
+    box-shadow: 0 0 18px rgba(183, 161, 107, 0.2);
+}
+
+.watchtower-shell .brand,
+.watchtower-shell .section-label {
+    color: var(--cg-ivory);
+}
+
+.watchtower-shell .slash,
+.watchtower-shell .status-time {
+    color: var(--cg-stone);
+}
+
+.watchtower-shell .status-dot,
+.watchtower-shell .state-live-dot {
+    background: var(--cg-green);
+    box-shadow: 0 0 12px rgba(135, 168, 149, 0.2);
+}
+
+.watchtower-shell .eyebrow,
+.watchtower-shell .micro-label,
+.watchtower-shell .map-label {
+    color: var(--cg-brass);
+    letter-spacing: 0.16em;
+}
+
+.watchtower-shell h1,
+.watchtower-shell h2,
+.watchtower-shell h3 {
+    color: var(--cg-ivory);
+    font-family: var(--cg-serif);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+}
+
+.watchtower-shell h1 {
+    font-size: clamp(3.4rem, 7vw, 6.8rem);
+    line-height: 0.98;
+}
+
+.watchtower-shell h1 em,
+.watchtower-shell h2 em {
+    color: var(--cg-brass);
+    font-weight: 400;
+}
+
+.watchtower-shell p {
+    color: var(--cg-stone);
+    line-height: 1.85;
+}
+
+.watchtower-shell .contract-meta {
+    color: var(--cg-stone);
+    border-color: var(--cg-border);
+}
+
+.watchtower-shell .state-section,
+.watchtower-shell .contract-map,
+.watchtower-shell .workspace,
+.watchtower-shell .alert-section,
+.watchtower-shell .timeline-section,
+.watchtower-shell .evidence-section {
+    border-color: var(--cg-border);
+}
+
+.watchtower-shell .state-overview,
+.watchtower-shell .state-metric,
+.watchtower-shell .map-panel,
+.watchtower-shell .map-stage,
+.watchtower-shell .alert-panel,
+.watchtower-shell .deadline-card,
+.watchtower-shell .evidence-panel,
+.watchtower-shell .timeline-panel {
+    background-color: var(--cg-surface);
+    border-color: var(--cg-border);
+    box-shadow: 0 18px 55px rgba(0, 0, 0, 0.15);
+}
+
+.watchtower-shell .map-stage {
+    background:
+        radial-gradient(
+            ellipse at 50% 44%,
+            rgba(183, 161, 107, 0.06),
+            transparent 52%
+        ),
+        #0D0F0E;
+}
+
+.watchtower-shell .monitor-node,
+.watchtower-shell .clause-row,
+.watchtower-shell .signal-card {
+    color: var(--cg-ivory);
+    background: var(--cg-surface-raised);
+    border-color: var(--cg-border);
+    transition:
+        transform 300ms var(--cg-ease),
+        background 250ms ease,
+        border-color 250ms ease,
+        box-shadow 250ms ease;
+}
+
+.watchtower-shell .monitor-node:hover,
+.watchtower-shell .clause-row:hover,
+.watchtower-shell .signal-card:hover {
+    background: #20221F;
+    border-color: rgba(183, 161, 107, 0.34);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    transform: translateY(-3px);
+}
+
+.watchtower-shell .monitor-node.active,
+.watchtower-shell .clause-row.selected {
+    border-color: rgba(183, 161, 107, 0.55);
+    background: rgba(183, 161, 107, 0.075);
+}
+
+.watchtower-shell .node-kicker,
+.watchtower-shell .node-index,
+.watchtower-shell .source-label {
+    color: var(--cg-brass);
+}
+
+.watchtower-shell .node-state.neutral {
+    color: var(--cg-stone);
+}
+
+.watchtower-shell .node-state.live {
+    color: var(--cg-green);
+}
+
+.watchtower-shell .node-state.attention,
+.watchtower-shell .state-attention {
+    color: var(--cg-amber);
+}
+
+.watchtower-shell .state-critical,
+.watchtower-shell .risk-critical {
+    color: var(--cg-red);
+}
+
+.watchtower-shell .contract-core {
+    color: var(--cg-ivory);
+    border-color: rgba(183, 161, 107, 0.4);
+}
+
+.watchtower-shell .core-ring {
+    border-color: rgba(183, 161, 107, 0.22);
+}
+
+.watchtower-shell .event-source,
+.watchtower-shell .deadline-card {
+    border-color: var(--cg-border);
+}
+
+.watchtower-shell .connection-path,
+.watchtower-shell .orbit-path {
+    stroke: rgba(183, 161, 107, 0.32);
+}
+
+.watchtower-shell .moving-signal,
+.watchtower-shell .signal-path {
+    stroke: var(--cg-brass);
+}
+
+.watchtower-shell button {
+    font-family: var(--cg-sans);
+}
+
+.watchtower-shell button:focus-visible {
+    outline: 2px solid var(--cg-brass);
+    outline-offset: 4px;
+}
+
+.watchtower-shell button:not(:disabled) {
+    transition:
+        color 220ms ease,
+        background 220ms ease,
+        border-color 220ms ease,
+        transform 260ms var(--cg-ease),
+        box-shadow 260ms ease;
+}
+
+.watchtower-shell button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.watchtower-shell .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+
+    transition:
+        opacity 750ms var(--cg-ease),
+        transform 750ms var(--cg-ease);
+}
+
+.watchtower-shell .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================================
+   SHARED DETAILS
+============================================================ */
+
+.app-shell *,
+.watchtower-shell * {
+    scrollbar-color: #484941 var(--cg-ink);
+}
+
+.app-shell ::-webkit-scrollbar,
+.watchtower-shell ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+}
+
+.app-shell ::-webkit-scrollbar-track,
+.watchtower-shell ::-webkit-scrollbar-track {
+    background: var(--cg-ink);
+}
+
+.app-shell ::-webkit-scrollbar-thumb,
+.watchtower-shell ::-webkit-scrollbar-thumb {
+    background: #393B35;
+    border: 2px solid var(--cg-ink);
+    border-radius: 12px;
+}
+
+.app-shell ::-webkit-scrollbar-thumb:hover,
+.watchtower-shell ::-webkit-scrollbar-thumb:hover {
+    background: #5B5B50;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 1100px) {
+    .app-shell .hero-copy h1 {
+        font-size: clamp(2.7rem, 5vw, 4.4rem);
+    }
+
+    .watchtower-shell {
+        width: min(100% - 36px, 1540px);
+    }
+
+    .watchtower-shell h1 {
+        font-size: clamp(3rem, 7vw, 5.2rem);
+    }
+}
+
+@media (max-width: 760px) {
+    .app-shell .hero-copy h1 {
+        font-size: clamp(2.5rem, 10vw, 4rem);
+    }
+
+    .app-shell .upload-card {
+        border-radius: 10px;
+    }
+
+    .app-shell .summary-strip {
+        gap: 15px;
+    }
+
+    .app-shell .risk-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .watchtower-shell {
+        width: calc(100% - 28px);
+        padding-top: 18px;
+    }
+
+    .watchtower-shell .topbar {
+        gap: 18px;
+        align-items: flex-start;
+    }
+
+    .watchtower-shell .topbar-status {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        text-align: right;
+        font-size: 9px;
+    }
+
+    .watchtower-shell h1 {
+        font-size: clamp(2.8rem, 12vw, 4.4rem);
+    }
+}
+
+@media (max-width: 480px) {
+    .app-shell .hero-copy h1 {
+        font-size: 2.5rem;
+    }
+
+    .app-shell .summary-metric strong {
+        font-size: 1.65rem;
+    }
+
+    .watchtower-shell .contract-meta {
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+}
+
+/* ============================================================
+   ACCESSIBILITY — REDUCED MOTION
+============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+    }
+
+    .app-shell .cg-reveal,
+    .watchtower-shell .reveal {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

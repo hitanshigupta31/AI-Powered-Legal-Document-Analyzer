@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0A0B0B">
+    <meta name="description" content="ClauseGuard helps you examine contract language, understand clause-level risk and follow important contractual signals.">
+    <title>ClauseGuard — Reading between the lines</title>
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem("clauseguard.theme");
+                document.documentElement.setAttribute("data-theme", savedTheme === "light" ? "light" : "dark");
+            } catch (error) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/light-theme.css">
+</head>
+<body class="public-page">
+    <div class="public-grain" aria-hidden="true"></div>
+    <div class="reading-spine" aria-hidden="true">
+        <div class="reading-spine-track"></div>
+        <div class="reading-spine-progress" id="readingSpineProgress"></div>
+        <span class="reading-spine-dot" id="readingSpineDot"></span>
+    </div>
+
+    <header class="public-header">
+        <div class="public-nav-shell">
+            <a class="public-brand" href="/" aria-label="ClauseGuard home">
+                <span class="public-brand-mark">C</span>
+                <span class="public-brand-copy">
+                    <strong>ClauseGuard</strong>
+                    <small>CONTRACT INTELLIGENCE</small>
+                </span>
+            </a>
+            <nav class="public-nav-links" aria-label="Main navigation">
+                <a href="#approach">Clause review</a>
+                <a href="#review">Risk insights</a>
+                <a href="#watchtower">Obligation monitoring</a>
+            </nav>
+            <div class="public-nav-actions">
+                <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme" title="Switch to light theme">
+                    <span class="theme-toggle-icon" aria-hidden="true">☼</span>
+                    <span class="theme-toggle-label">Light theme</span>
+                </button>
+                <a class="public-signin" href="/login">Sign in</a>
+                <a class="cg-button cg-button-primary" href="/register">Get started <span aria-hidden="true">↗</span></a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- ACT 0: EDITORIAL OPENING -->
+        <section class="public-hero cg-container" id="top">
+            <div class="public-hero-copy">
+                <p class="cg-eyebrow"><span class="cg-eyebrow-line"></span> CONTRACT INTELLIGENCE · 001</p>
+                <h1>ClauseGuard is<br><em>reading</em> your<br>contract.</h1>
+                <p class="public-hero-lede">Not just searching for keywords. Tracing the clauses, surfacing provisions that deserve a closer look, and helping you understand the obligations written between the lines.</p>
+                <div class="public-hero-actions">
+                    <a class="cg-button cg-button-primary" href="/register">Start reviewing <span aria-hidden="true">↗</span></a>
+                    <a class="cg-button cg-button-quiet" href="#approach">Follow the process <span aria-hidden="true">↓</span></a>
+                </div>
+                <p class="public-hero-note"><span class="public-note-mark">✳</span> Contract review support that keeps the source language in view.</p>
+            </div>
+
+            <!-- Illustrative preview only; it is not presented as live user data. -->
+            <div class="public-hero-art" aria-label="Illustrative ClauseGuard contract review preview">
+                <div class="hero-art-orbit hero-art-orbit-one"></div>
+                <div class="hero-art-orbit hero-art-orbit-two"></div>
+                <div class="hero-art-window">
+                    <div class="hero-art-toolbar">
+                        <span class="hero-art-wordmark"><i></i> CLAUSEGUARD <b>/</b> REVIEW</span>
+                        <span class="hero-art-caption">INTERFACE PREVIEW</span>
+                    </div>
+                    <div class="hero-art-body">
+                        <article class="sample-document">
+                            <p class="sample-micro">MASTER SERVICES AGREEMENT</p>
+                            <h2>Terms &amp;<br>Conditions</h2>
+                            <p class="sample-paragraph">This Agreement sets out the rights, responsibilities and obligations of the parties for the duration of the engagement.</p>
+                            <p class="sample-paragraph">Each party shall perform its obligations in accordance with the provisions and schedules set out below.</p>
+                            <div class="sample-highlight">
+                                <span>§ 14.2 · INDEMNIFICATION</span>
+                                <i></i><i></i><i class="short"></i>
+                            </div>
+                            <p class="sample-document-foot">ILLUSTRATIVE CLAUSE EXTRACT</p>
+                        </article>
+                        <aside class="sample-insight">
+                            <p class="sample-micro">CLAUSE INSIGHT</p>
+                            <h3>A closer look.</h3>
+                            <div class="sample-risk-block">
+                                <div><span>REVIEW PRIORITY</span><b>01</b></div>
+                                <strong>Indemnification</strong>
+                                <p>Examine the scope of responsibility and the limits that apply.</p>
+                            </div>
+                            <div class="sample-insight-row"><i></i><span><b>Understand the clause</b><small>Read the obligation in context.</small></span></div>
+                            <div class="sample-insight-row"><i></i><span><b>Inspect the risk signal</b><small>See what may deserve review.</small></span></div>
+                            <div class="sample-insight-row"><i></i><span><b>Consider next steps</b><small>Keep the source text close.</small></span></div>
+                        </aside>
+                    </div>
+                    <div class="hero-art-footer"><span>DOCUMENT REVIEW / CLAUSE-LEVEL INSIGHT</span><b>EXAMPLE VIEW ↗</b></div>
+                </div>
+                <div class="hero-floating-note"><span class="hero-floating-icon">↗</span><span><b>Look beyond the wording.</b><small>Understand the commitment.</small></span></div>
+            </div>
+            <a class="public-scroll-cue" href="#approach" aria-label="Scroll to explore"><span>SCROLL TO EXPLORE</span><i></i></a>
+        </section>
+
+        <!-- PRINCIPLES STRIP -->
+        <section class="cg-container public-principles cg-reveal" aria-label="ClauseGuard principles">
+            <div><span>01</span><p><b>Read with context</b><small>Explore clauses as part of the agreement.</small></p></div>
+            <div><span>02</span><p><b>Ask better questions</b><small>Understand the language in plain English.</small></p></div>
+            <div><span>03</span><p><b>Keep obligations in view</b><small>Connect monitored provisions to events.</small></p></div>
+        </section>
+
+        <!-- ACT 1: REVIEW APPROACH -->
+        <section class="cg-container public-act" id="approach">
+            <div class="public-act-copy cg-reveal">
+                <p class="cg-eyebrow"><span>01</span> — THE APPROACH</p>
+                <h2>A contract is<br>more than its<br><em>fine print.</em></h2>
+                <p>Some obligations are easy to miss when an agreement is read as one long document. ClauseGuard gives the review a structure: the clause, the signal, and the reason to look closer.</p>
+            </div>
+            <div class="public-document-stage cg-reveal" aria-label="Illustrative contract clause analysis">
+                <div class="public-stage-heading"><span>DOCUMENT STRUCTURE</span><span>ILLUSTRATIVE EXAMPLE</span></div>
+                <div class="document-lines">
+                    <div class="doc-section-label"><span>01</span><b>Definitions</b><i>§ 1.1 — 1.8</i></div>
+                    <div class="doc-line-group"><i></i><i></i><i class="w72"></i></div>
+                    <div class="doc-section-label"><span>02</span><b>Services &amp; payment</b><i>§ 2.1 — 4.6</i></div>
+                    <div class="doc-line-group"><i></i><i class="w86"></i><i class="w64"></i></div>
+                    <div class="doc-section-label flagged"><span>03</span><b>Indemnification</b><i>§ 14.2</i><em>REVIEW</em></div>
+                    <div class="doc-line-group flagged-lines"><i></i><i class="w86"></i><i class="w58"></i></div>
+                    <div class="doc-section-label"><span>04</span><b>Governing law</b><i>§ 22.1</i></div>
+                    <div class="doc-line-group"><i></i><i class="w72"></i></div>
+                </div>
+                <div class="public-stage-bottom"><span>CLAUSE STRUCTURE</span><span class="moving-mark">● <i></i> <i></i></span></div>
+            </div>
+        </section>
+
+        <!-- ACT 2: WHAT A REVIEW LOOKS LIKE -->
+        <section class="public-dark-act" id="review">
+            <div class="cg-container public-act public-act-reverse">
+                <div class="public-act-copy cg-reveal">
+                    <p class="cg-eyebrow"><span>02</span> — CLAUSE-LEVEL REVIEW</p>
+                    <h2>Find the signal.<br>Follow the <em>reason.</em></h2>
+                    <p>Risk labels are only the beginning. Open a finding to inspect the source clause, understand why it was surfaced and decide what deserves a closer read.</p>
+                    <a class="cg-text-link" href="/register">Explore contract review <span>↗</span></a>
+                </div>
+                <div class="finding-stack cg-reveal" aria-label="Illustrative clause findings">
+                    <div class="finding-stack-head"><span>PRIORITY FINDINGS</span><span>EXAMPLE · NOT LIVE DATA</span></div>
+                    <article class="finding-row finding-high"><span class="finding-index">01</span><div><small>CLAUSE 14.2</small><h3>Indemnification</h3><p>Examine the scope of responsibility and how related limits apply.</p></div><span class="finding-tag">HIGH</span></article>
+                    <article class="finding-row finding-medium"><span class="finding-index">02</span><div><small>CLAUSE 9.3</small><h3>Automatic renewal</h3><p>Check the notice window and the conditions for renewal.</p></div><span class="finding-tag">REVIEW</span></article>
+                    <article class="finding-row finding-low"><span class="finding-index">03</span><div><small>CLAUSE 22.1</small><h3>Governing law</h3><p>Understand the selected law and dispute venue.</p></div><span class="finding-tag">CHECK</span></article>
+                    <div class="finding-stack-foot">EXAMPLE FINDINGS · ACTUAL RESULTS DEPEND ON THE UPLOADED CONTRACT</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ACT 3: WATCHTOWER -->
+        <section class="cg-container public-act public-watchtower-act" id="watchtower">
+            <div class="public-act-copy cg-reveal">
+                <p class="cg-eyebrow"><span>03</span> — WATCHTOWER</p>
+                <h2>The contract,<br><em>in motion.</em></h2>
+                <p>Watchtower connects monitored contractual provisions with events that may affect them. Follow the trace from the event to the relevant clause, rule and date when the source contract supports one.</p>
+                <a class="cg-button cg-button-quiet" href="/register">Explore ClauseGuard <span>↗</span></a>
+            </div>
+            <div class="signal-preview cg-reveal">
+                <div class="signal-preview-top"><span>CONTRACT SIGNAL MAP</span><span><i></i> INTERFACE PREVIEW</span></div>
+                <div class="signal-preview-grid">
+                    <article><small>01 / EVENT</small><span class="signal-preview-symbol">○</span><b>Event detected</b><p>A real-world signal is recorded for evaluation.</p></article>
+                    <span class="signal-arrow">→</span>
+                    <article><small>02 / CLAUSE</small><span class="signal-preview-symbol">§</span><b>Provision matched</b><p>Inspect the clause connected to the event.</p></article>
+                    <span class="signal-arrow">→</span>
+                    <article><small>03 / RULE</small><span class="signal-preview-symbol">⌁</span><b>Consequence</b><p>Review the applicable rule and any supported date.</p></article>
+                </div>
+                <div class="signal-preview-bottom"><span>EVENT</span><i></i><span>CLAUSE</span><i></i><span>RULE</span><i></i><span>DEADLINE</span></div>
+            </div>
+        </section>
+
+        <!-- CLOSING -->
+        <section class="public-closing">
+            <div class="cg-container cg-reveal">
+                <p class="cg-eyebrow"><span class="cg-eyebrow-line"></span> YOUR NEXT AGREEMENT <span class="cg-eyebrow-line"></span></p>
+                <h2>Read the words.<br>Understand the <em>commitment.</em></h2>
+                <p>Start with the agreement in front of you. Examine the clauses, ask questions and bring important obligations into focus.</p>
+                <a class="cg-button cg-button-primary" href="/register">Get started with ClauseGuard <span>↗</span></a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="public-footer">
+        <div class="cg-container public-footer-inner">
+            <a class="public-brand" href="/" aria-label="ClauseGuard home"><span class="public-brand-mark">C</span><span class="public-brand-copy"><strong>ClauseGuard</strong><small>CONTRACT INTELLIGENCE</small></span></a>
+            <p>Contract review and decision support.<br>Not a replacement for advice from a qualified legal professional.</p>
+            <nav aria-label="Footer navigation"><a href="/login">Sign in</a><a href="/register">Create account</a><a href="#top">Back to top ↑</a></nav>
+        </div>
+    </footer>
+
+    <script src="/static/landing-motion.js"></script>
+    <script src="/static/theme-toggle.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    />
+
+    <title>
+        Sign in — ClauseGuard
+    </title>
+
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem("clauseguard.theme");
+                document.documentElement.setAttribute("data-theme", savedTheme === "light" ? "light" : "dark");
+            } catch (error) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    />
+    <link rel="stylesheet" href="/static/light-theme.css">
+</head>
+
+
+<body class="auth-page">
+
+    <main class="auth-shell">
+
+        <section class="auth-brand-panel">
+
+            <div class="auth-brand">
+
+                <div class="brand-mark">
+                    C
+                </div>
+
+                <div>
+
+                    <div class="brand-name">
+                        ClauseGuard
+                    </div>
+
+                    <div class="brand-subtitle">
+                        CONTRACT INTELLIGENCE
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="auth-message">
+
+                <div class="eyebrow">
+                    CONTRACT REVIEW
+                </div>
+
+                <h1>
+                    Understand your contract
+                    before you sign.
+                </h1>
+
+                <p>
+                    ClauseGuard organizes agreements into
+                    clauses and surfaces provisions that may
+                    deserve closer review.
+                </p>
+
+            </div>
+
+
+            <div class="auth-footer-copy">
+                Document intelligence for founders,
+                freelancers and small businesses.
+            </div>
+
+        </section>
+
+
+        <section class="auth-form-panel">
+
+            <button class="theme-toggle theme-toggle-auth" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme" title="Switch to light theme">
+                <span class="theme-toggle-icon" aria-hidden="true">☼</span>
+                <span class="theme-toggle-label">Light theme</span>
+            </button>
+
+            <div class="auth-form-wrap">
+
+                <div class="mobile-auth-brand">
+
+                    <div class="brand-mark">
+                        C
+                    </div>
+
+                    <div>
+                        <div class="brand-name">
+                            ClauseGuard
+                        </div>
+
+                        <div class="brand-subtitle">
+                            CONTRACT INTELLIGENCE
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="auth-kicker">
+                    WELCOME BACK
+                </div>
+
+                <h2>
+                    Sign in to your workspace
+                </h2>
+
+                <p class="auth-subtitle">
+                    Continue reviewing your contracts.
+                </p>
+
+
+                <div
+                    id="authError"
+                    class="auth-error hidden"
+                ></div>
+
+
+                <form
+                    id="loginForm"
+                    class="auth-form"
+                >
+
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    />
+
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    />
+
+
+                    <button
+                        class="auth-submit"
+                        type="submit"
+                        id="loginButton"
+                    >
+                        Sign in
+                        <span>→</span>
+                    </button>
+
+                </form>
+
+
+                <div class="auth-switch">
+
+                    Don't have an account?
+
+                    <a href="/register">
+                        Create one
+                    </a>
+
+                </div>
+
+
+                <div class="auth-disclaimer">
+                    ClauseGuard is a contract review and
+                    decision-support tool. It does not replace
+                    legal advice from a qualified professional.
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="/static/auth.js?v=auth-flow-capture-20261029-3"></script>
+
+    <script src="/static/theme-toggle.js"></script>
+
+</body>
+
+</html>

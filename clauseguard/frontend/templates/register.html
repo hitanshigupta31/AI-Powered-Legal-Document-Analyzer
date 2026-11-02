@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create account — ClauseGuard</title>
+
+    <script>
+        (function () {
+            try {
+                var savedTheme = localStorage.getItem("clauseguard.theme");
+                document.documentElement.setAttribute("data-theme", savedTheme === "light" ? "light" : "dark");
+            } catch (error) {
+                document.documentElement.setAttribute("data-theme", "dark");
+            }
+        })();
+    </script>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+    <link rel="stylesheet" href="/static/light-theme.css">
+</head>
+
+
+<body class="auth-page">
+
+    <main class="auth-shell">
+
+        <!-- ==================================================
+             LEFT PANEL
+        =================================================== -->
+
+        <section class="auth-brand-panel">
+
+            <div class="auth-brand">
+
+                <div class="brand-mark">
+                    C
+                </div>
+
+                <div>
+
+                    <div class="brand-name">
+                        ClauseGuard
+                    </div>
+
+                    <div class="brand-subtitle">
+                        CONTRACT INTELLIGENCE
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="auth-message">
+
+                <div class="eyebrow">
+                    YOUR CONTRACT WORKSPACE
+                </div>
+
+                <h1>
+                    Keep your contract
+                    reviews organized.
+                </h1>
+
+                <p>
+                    Create your workspace to analyze
+                    agreements, inspect clause-level risks,
+                    and build your review history.
+                </p>
+
+            </div>
+
+
+            <div class="auth-footer-copy">
+
+                Built for founders, freelancers and
+                small business teams.
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             RIGHT PANEL
+        =================================================== -->
+
+        <section class="auth-form-panel">
+
+            <button class="theme-toggle theme-toggle-auth" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme" title="Switch to light theme">
+                <span class="theme-toggle-icon" aria-hidden="true">☼</span>
+                <span class="theme-toggle-label">Light theme</span>
+            </button>
+
+            <div class="auth-form-wrap">
+
+
+                <!-- MOBILE BRAND -->
+
+                <div class="mobile-auth-brand">
+
+                    <div class="brand-mark">
+                        C
+                    </div>
+
+                    <div>
+
+                        <div class="brand-name">
+                            ClauseGuard
+                        </div>
+
+                        <div class="brand-subtitle">
+                            CONTRACT INTELLIGENCE
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- HEADER -->
+
+                <div class="auth-kicker">
+                    GET STARTED
+                </div>
+
+                <h2>
+                    Create your workspace
+                </h2>
+
+                <p class="auth-subtitle">
+                    Set up your ClauseGuard account.
+                </p>
+
+
+                <!-- ERROR -->
+
+                <div
+                    id="authError"
+                    class="auth-error hidden"
+                ></div>
+
+
+                <!-- FORM -->
+
+                <form
+                    id="registerForm"
+                    class="auth-form"
+                >
+
+                    <label for="name">
+                        Name
+                    </label>
+
+                    <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        placeholder="Your name"
+                        autocomplete="name"
+                        required
+                    >
+
+
+                    <label for="email">
+                        Email
+                    </label>
+
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="At least 8 characters"
+                        autocomplete="new-password"
+                        minlength="8"
+                        required
+                    >
+
+
+                    <button
+                        class="auth-submit"
+                        type="submit"
+                        id="registerButton"
+                    >
+                        Create account
+
+                        <span>
+                            →
+                        </span>
+
+                    </button>
+
+                </form>
+
+
+                <!-- LOGIN LINK -->
+
+                <div class="auth-switch">
+
+                    Already have an account?
+
+                    <a href="/login">
+                        Sign in
+                    </a>
+
+                </div>
+
+
+                <!-- DISCLAIMER -->
+
+                <div class="auth-disclaimer">
+
+                    ClauseGuard is a contract review and
+                    decision-support tool. It does not replace
+                    legal advice from a qualified professional.
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="/static/auth.js?v=auth-flow-capture-20261029-3"></script>
+
+    <script src="/static/theme-toggle.js"></script>
+
+</body>
+
+</html>
